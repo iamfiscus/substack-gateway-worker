@@ -1,0 +1,12 @@
+{
+  "content": [
+    {
+      "type": "blockquote",
+      "content": [
+        {
+          "type": "blockquote"
+        }
+      ]
+    }
+  ]
+}

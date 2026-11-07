@@ -1,0 +1,1 @@
+{"bodyJson": {"attrs": {"schemaVersion": "v1"}, "content": [{"content": [{"text": ":::callout\n> a", "type": "text"}], "type": "paragraph"}, {"content": [{"text": ":::align{default}\n> b\n:::\n:::", "type": "text"}], "type": "paragraph"}], "type": "doc"}, "replyMinimumRole": "everyone", "surface": "feed", "tabId": "for-you"}

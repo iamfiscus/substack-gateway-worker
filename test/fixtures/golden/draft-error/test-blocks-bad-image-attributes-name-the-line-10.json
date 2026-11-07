@@ -1,0 +1,1 @@
+{"error": "DraftMarkdownError", "line": 3, "message": "watermark takes no value or a percentage of the image width, e.g. watermark=8%", "str": "line 3: watermark takes no value or a percentage of the image width, e.g. watermark=8%"}

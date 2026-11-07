@@ -1,0 +1,9 @@
+```substack-node
+{
+  "type": "button",
+  "attrs": {
+    "text": 1,
+    "url": null
+  }
+}
+```

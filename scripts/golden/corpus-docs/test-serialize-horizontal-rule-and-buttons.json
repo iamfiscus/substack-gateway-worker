@@ -1,0 +1,44 @@
+{
+  "type": "doc",
+  "content": [
+    {
+      "type": "horizontal_rule"
+    },
+    {
+      "type": "button",
+      "attrs": {
+        "action": null,
+        "class": null,
+        "url": "%%checkout_url%%",
+        "text": "Subscribe now"
+      }
+    },
+    {
+      "type": "button",
+      "attrs": {
+        "action": null,
+        "class": null,
+        "url": "%%share_url%%",
+        "text": "Share"
+      }
+    },
+    {
+      "type": "button",
+      "attrs": {
+        "action": null,
+        "class": null,
+        "url": "%%half_magic_comments_url%%",
+        "text": "Leave a comment"
+      }
+    },
+    {
+      "type": "button",
+      "attrs": {
+        "action": null,
+        "class": null,
+        "url": "https://x.example/a b",
+        "text": "Go ]here[ \\o/"
+      }
+    }
+  ]
+}

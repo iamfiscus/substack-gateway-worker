@@ -1,0 +1,3 @@
+::defaults{align=default}
+
+Text

@@ -1,0 +1,1 @@
+\::button\[Go\]\{href=share\}

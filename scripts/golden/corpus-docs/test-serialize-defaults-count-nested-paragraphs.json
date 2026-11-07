@@ -1,0 +1,56 @@
+{
+  "type": "doc",
+  "content": [
+    {
+      "type": "paragraph",
+      "attrs": {
+        "textAlign": null
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "A"
+        }
+      ]
+    },
+    {
+      "type": "bullet_list",
+      "content": [
+        {
+          "type": "list_item",
+          "content": [
+            {
+              "type": "paragraph",
+              "attrs": {
+                "textAlign": "justify"
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "x"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "list_item",
+          "content": [
+            {
+              "type": "paragraph",
+              "attrs": {
+                "textAlign": "justify"
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "y"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

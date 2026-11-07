@@ -1,0 +1,1 @@
+{"bodyJson": {"attrs": {"schemaVersion": "v1"}, "content": [{"content": [{"text": "bold\r\nacross", "type": "text"}, {"text": " and ", "type": "text"}, {"marks": [{"type": "italic"}], "text": "it\ralic", "type": "text"}, {"text": "\r", "type": "text"}], "type": "paragraph"}], "type": "doc"}, "replyMinimumRole": "everyone", "surface": "feed", "tabId": "for-you"}

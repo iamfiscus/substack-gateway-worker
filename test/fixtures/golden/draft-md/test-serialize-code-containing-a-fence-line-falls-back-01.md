@@ -1,0 +1,15 @@
+```substack-node
+{
+  "type": "highlighted_code_block",
+  "attrs": {
+    "language": "python",
+    "nodeId": null
+  },
+  "content": [
+    {
+      "type": "text",
+      "text": "a\n```\nb"
+    }
+  ]
+}
+```

@@ -1,0 +1,1 @@
+{"content": [{"attrs": {"textAlign": null}, "content": [{"text": "run ", "type": "text"}, {"marks": [{"type": "code"}], "text": "a*b\\c[d]", "type": "text"}, {"text": " now", "type": "text"}], "type": "paragraph"}], "type": "doc"}

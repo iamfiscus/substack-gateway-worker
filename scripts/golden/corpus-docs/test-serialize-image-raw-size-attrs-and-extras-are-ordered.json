@@ -1,0 +1,33 @@
+{
+  "type": "doc",
+  "content": [
+    {
+      "type": "captionedImage",
+      "content": [
+        {
+          "type": "image2",
+          "attrs": {
+            "srcNoWatermark": "https://substack-post-media.s3.amazonaws.com/public/images/a_1536x1024.png",
+            "fullscreen": false,
+            "imageSize": "large",
+            "height": 1024,
+            "width": 1536,
+            "resizeWidth": 800,
+            "bytes": 1234,
+            "alt": "H",
+            "title": null,
+            "type": null,
+            "href": null,
+            "internalRedirect": null,
+            "align": "center",
+            "belowTheFold": false,
+            "topImage": false,
+            "isProcessing": false,
+            "offset": false,
+            "src": "https://substack-post-media.s3.amazonaws.com/public/images/a_1536x1024.png"
+          }
+        }
+      ]
+    }
+  ]
+}

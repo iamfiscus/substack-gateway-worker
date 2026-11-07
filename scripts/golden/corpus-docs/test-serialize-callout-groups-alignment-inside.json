@@ -1,0 +1,35 @@
+{
+  "type": "doc",
+  "content": [
+    {
+      "type": "calloutBlock",
+      "content": [
+        {
+          "type": "heading",
+          "attrs": {
+            "level": 2,
+            "textAlign": "center"
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "H"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "attrs": {
+            "textAlign": null
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "B"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

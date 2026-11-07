@@ -1,0 +1,47 @@
+{
+  "type": "doc",
+  "content": [
+    {
+      "type": "pullquote",
+      "attrs": {
+        "align": null,
+        "color": null
+      },
+      "content": [
+        {
+          "type": "paragraph",
+          "attrs": {
+            "textAlign": null
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "a"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "pullquote",
+      "attrs": {
+        "align": null,
+        "color": null
+      },
+      "content": [
+        {
+          "type": "paragraph",
+          "attrs": {
+            "textAlign": null
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "b"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

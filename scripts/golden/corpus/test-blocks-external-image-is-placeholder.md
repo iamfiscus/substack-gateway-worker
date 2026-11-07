@@ -1,0 +1,1 @@
+![A cat](https://x/cat.png)

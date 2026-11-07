@@ -1,0 +1,35 @@
+{
+  "type": "doc",
+  "content": [
+    {
+      "type": "paragraph",
+      "attrs": {
+        "textAlign": null
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "see "
+        },
+        {
+          "type": "text",
+          "text": "docs",
+          "marks": [
+            {
+              "type": "link",
+              "attrs": {
+                "href": "https://x",
+                "target": "_blank",
+                "rel": "noopener noreferrer nofollow",
+                "class": null
+              }
+            },
+            {
+              "type": "strong"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

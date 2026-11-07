@@ -1,0 +1,62 @@
+```substack-node
+{
+  "type": "paragraph",
+  "attrs": {
+    "textAlign": null
+  },
+  "content": [
+    {
+      "type": "text",
+      "text": "  "
+    },
+    {
+      "type": "text",
+      "text": "]a",
+      "marks": [
+        {
+          "type": "strong"
+        },
+        {
+          "type": "em"
+        },
+        {
+          "type": "strikethrough"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "text": "}b}",
+      "marks": [
+        {
+          "type": "strong"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "text": ":!",
+      "marks": [
+        {
+          "type": "link",
+          "attrs": {
+            "href": "https://x",
+            "target": "_blank",
+            "rel": "noopener noreferrer nofollow",
+            "class": null
+          }
+        },
+        {
+          "type": "strong"
+        },
+        {
+          "type": "em"
+        },
+        {
+          "type": "strikethrough"
+        }
+      ]
+    }
+  ]
+}
+```

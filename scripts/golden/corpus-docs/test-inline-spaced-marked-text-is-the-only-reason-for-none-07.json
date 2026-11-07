@@ -1,0 +1,68 @@
+{
+  "type": "doc",
+  "content": [
+    {
+      "type": "paragraph",
+      "attrs": {
+        "textAlign": null
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": " *",
+          "marks": [
+            {
+              "type": "strong"
+            },
+            {
+              "type": "em"
+            },
+            {
+              "type": "strikethrough"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "text": "[",
+          "marks": [
+            {
+              "type": "strong"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "text": "]bb",
+          "marks": [
+            {
+              "type": "strong"
+            },
+            {
+              "type": "em"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "text": "* (",
+          "marks": [
+            {
+              "type": "strong"
+            },
+            {
+              "type": "em"
+            },
+            {
+              "type": "strikethrough"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "text": ":🔁*"
+        }
+      ]
+    }
+  ]
+}

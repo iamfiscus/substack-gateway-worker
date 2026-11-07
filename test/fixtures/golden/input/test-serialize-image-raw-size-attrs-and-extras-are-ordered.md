@@ -1,0 +1,1 @@
+![H](https://substack-post-media.s3.amazonaws.com/public/images/a_1536x1024.png){imageSize=large resizeWidth=800 align=center fullscreen=false original=https://substack-post-media.s3.amazonaws.com/public/images/a_1536x1024.png bytes=1234 height=1024 width=1536}

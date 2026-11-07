@@ -12,7 +12,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "biome check .",
     "deploy": "wrangler deploy",
-    "golden": "echo 'golden: not yet implemented (Task 13)' && exit 0"
+    "golden": "cd upstream && uv run python ../scripts/golden/generate.py"
   },
   "dependencies": {
     "@hono/zod-openapi": "^1.6.3",

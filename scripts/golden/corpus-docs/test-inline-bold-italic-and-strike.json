@@ -1,0 +1,38 @@
+{
+  "type": "doc",
+  "content": [
+    {
+      "type": "paragraph",
+      "attrs": {
+        "textAlign": null
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "a",
+          "marks": [
+            {
+              "type": "strong"
+            },
+            {
+              "type": "em"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "text": " b "
+        },
+        {
+          "type": "text",
+          "text": "c",
+          "marks": [
+            {
+              "type": "strikethrough"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

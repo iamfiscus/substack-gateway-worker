@@ -1,0 +1,37 @@
+{
+  "type": "doc",
+  "content": [
+    {
+      "type": "paragraph",
+      "attrs": {
+        "textAlign": null
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "\\",
+          "marks": [
+            {
+              "type": "strikethrough"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "text": "\\",
+          "marks": [
+            {
+              "type": "link",
+              "attrs": {
+                "href": "https://y/(z)",
+                "target": "_blank",
+                "rel": "noopener noreferrer nofollow",
+                "class": null
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

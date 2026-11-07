@@ -1,0 +1,2 @@
+> A
+> ::defaults{align=left}

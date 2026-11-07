@@ -1,0 +1,11 @@
+{
+  "type": "doc",
+  "content": [
+    {
+      "type": "videoEmbed",
+      "attrs": {
+        "id": "v"
+      }
+    }
+  ]
+}

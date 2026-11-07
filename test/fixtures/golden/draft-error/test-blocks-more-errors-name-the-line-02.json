@@ -1,0 +1,1 @@
+{"error": "DraftMarkdownError", "line": 3, "message": "unclosed latex fence: close it with a line holding only $$", "str": "line 3: unclosed latex fence: close it with a line holding only $$"}

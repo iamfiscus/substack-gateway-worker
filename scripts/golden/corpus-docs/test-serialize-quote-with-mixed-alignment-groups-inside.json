@@ -1,0 +1,34 @@
+{
+  "type": "doc",
+  "content": [
+    {
+      "type": "blockquote",
+      "content": [
+        {
+          "type": "paragraph",
+          "attrs": {
+            "textAlign": null
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "a"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "attrs": {
+            "textAlign": "center"
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "b"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

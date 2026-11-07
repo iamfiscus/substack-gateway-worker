@@ -1,0 +1,1 @@
+::buttoné[Go]{href=x}

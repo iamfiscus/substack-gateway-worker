@@ -1,0 +1,1 @@
+{"bodyJson": {"attrs": {"schemaVersion": "v1"}, "content": [{"content": [{"text": "A\r", "type": "text"}], "type": "paragraph"}, {"content": [{"text": "B\r\rC", "type": "text"}], "type": "paragraph"}, {"content": [{"text": "D", "type": "text"}], "type": "paragraph"}], "type": "doc"}, "replyMinimumRole": "everyone", "surface": "feed", "tabId": "for-you"}

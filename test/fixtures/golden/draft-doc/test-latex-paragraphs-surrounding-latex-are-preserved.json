@@ -1,0 +1,1 @@
+{"content": [{"attrs": {"textAlign": null}, "content": [{"text": "Before", "type": "text"}], "type": "paragraph"}, {"attrs": {"id": "GOLDENID00", "persistentExpression": "E = mc^2"}, "type": "latex_block"}, {"attrs": {"textAlign": null}, "content": [{"text": "After", "type": "text"}], "type": "paragraph"}], "type": "doc"}

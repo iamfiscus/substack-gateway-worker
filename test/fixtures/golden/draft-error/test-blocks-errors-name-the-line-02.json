@@ -1,0 +1,1 @@
+{"error": "DraftMarkdownError", "line": 3, "message": "::defaults is allowed only once, as the first line", "str": "line 3: ::defaults is allowed only once, as the first line"}

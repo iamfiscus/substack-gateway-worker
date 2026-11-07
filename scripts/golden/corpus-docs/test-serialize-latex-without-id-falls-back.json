@@ -1,0 +1,11 @@
+{
+  "type": "doc",
+  "content": [
+    {
+      "type": "latex_block",
+      "attrs": {
+        "persistentExpression": "x"
+      }
+    }
+  ]
+}

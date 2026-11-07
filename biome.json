@@ -8,6 +8,8 @@
       "!.wrangler",
       "!test/fixtures",
       "!test/features",
+      "!scripts/golden/corpus",
+      "!scripts/golden/corpus-docs",
       "!package-lock.json"
     ]
   },

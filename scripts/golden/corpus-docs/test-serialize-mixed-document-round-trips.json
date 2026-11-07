@@ -1,0 +1,159 @@
+{
+  "type": "doc",
+  "content": [
+    {
+      "type": "paragraph",
+      "attrs": {
+        "textAlign": "justify"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "a"
+        }
+      ]
+    },
+    {
+      "type": "videoEmbed",
+      "attrs": {
+        "id": "v"
+      }
+    },
+    {
+      "type": "blockquote",
+      "content": [
+        {
+          "type": "paragraph",
+          "attrs": {
+            "textAlign": null
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "x"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "blockquote",
+      "content": [
+        {
+          "type": "paragraph",
+          "attrs": {
+            "textAlign": null
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "y"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "bullet_list",
+      "content": [
+        {
+          "type": "list_item",
+          "content": [
+            {
+              "type": "paragraph",
+              "attrs": {
+                "textAlign": null
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "l"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "datawrapper",
+      "attrs": {
+        "url": "u"
+      }
+    },
+    {
+      "type": "bullet_list",
+      "content": [
+        {
+          "type": "list_item",
+          "content": [
+            {
+              "type": "paragraph",
+              "attrs": {
+                "textAlign": null
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "m"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "ordered_list",
+      "attrs": {
+        "start": 2,
+        "type": null,
+        "order": 1
+      },
+      "content": [
+        {
+          "type": "list_item",
+          "content": [
+            {
+              "type": "paragraph",
+              "attrs": {
+                "textAlign": null
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "o"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "highlighted_code_block",
+      "attrs": {
+        "language": null,
+        "nodeId": null
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "```"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "attrs": {
+        "textAlign": "center"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "b"
+        }
+      ]
+    }
+  ]
+}

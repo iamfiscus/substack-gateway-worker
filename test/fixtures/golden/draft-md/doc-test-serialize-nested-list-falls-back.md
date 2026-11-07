@@ -1,0 +1,28 @@
+```substack-node
+{
+  "type": "bullet_list",
+  "content": [
+    {
+      "type": "list_item",
+      "content": [
+        {
+          "type": "paragraph",
+          "attrs": {
+            "textAlign": null
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "a"
+            }
+          ]
+        },
+        {
+          "type": "bullet_list",
+          "content": []
+        }
+      ]
+    }
+  ]
+}
+```

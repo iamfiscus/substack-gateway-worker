@@ -1,0 +1,1 @@
+watermark-opacity=10

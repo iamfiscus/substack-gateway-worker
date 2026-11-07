@@ -1,0 +1,1 @@
+{"error": "DraftMarkdownError", "line": 3, "message": "watermark-opacity must be a whole number from 0 to 100", "str": "line 3: watermark-opacity must be a whole number from 0 to 100"}

@@ -1,0 +1,149 @@
+{
+  "type": "doc",
+  "content": [
+    {
+      "type": "heading",
+      "attrs": {
+        "level": 2
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Legacy"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "no attrs at all"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "attrs": null,
+      "content": [
+        {
+          "type": "text",
+          "text": "null attrs"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "attrs": {},
+      "content": [
+        {
+          "type": "text",
+          "text": "empty attrs"
+        }
+      ]
+    },
+    {
+      "type": "bullet_list",
+      "content": [
+        {
+          "type": "list_item",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "in a list"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "list_item",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "in a list"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "ordered_list",
+      "attrs": {
+        "start": 1,
+        "type": null,
+        "order": 1
+      },
+      "content": [
+        {
+          "type": "list_item",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "in a list"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "blockquote",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "in a quote"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "pullquote",
+      "attrs": {
+        "align": null,
+        "color": null
+      },
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "in a pullquote"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "calloutBlock",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "in a callout"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

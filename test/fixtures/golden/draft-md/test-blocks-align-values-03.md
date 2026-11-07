@@ -1,0 +1,3 @@
+::defaults{align=right}
+
+A

@@ -1,0 +1,32 @@
+{
+  "type": "doc",
+  "content": [
+    {
+      "type": "paragraph",
+      "attrs": {
+        "textAlign": null
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "wiki",
+          "marks": [
+            {
+              "type": "link",
+              "attrs": {
+                "href": "https://en.wikipedia.org/wiki/A_(b)\\c",
+                "target": "_blank",
+                "rel": "noopener noreferrer nofollow",
+                "class": null
+              }
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "text": " (more)"
+        }
+      ]
+    }
+  ]
+}

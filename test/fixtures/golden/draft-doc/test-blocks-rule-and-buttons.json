@@ -1,0 +1,1 @@
+{"content": [{"type": "horizontal_rule"}, {"attrs": {"action": null, "class": null, "text": "Subscribe now", "url": "%%checkout_url%%"}, "type": "button"}, {"attrs": {"action": null, "class": null, "text": "Go", "url": "https://x"}, "type": "button"}], "type": "doc"}

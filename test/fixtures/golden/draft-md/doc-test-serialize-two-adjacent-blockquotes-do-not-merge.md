@@ -1,0 +1,5 @@
+> a
+
+:::align{default}
+> b
+:::

@@ -1,0 +1,58 @@
+{
+  "type": "doc",
+  "content": [
+    {
+      "type": "heading",
+      "attrs": {
+        "level": 3,
+        "textAlign": null
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "H"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "attrs": {
+        "textAlign": null
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "a "
+        },
+        {
+          "type": "text",
+          "text": "b",
+          "marks": [
+            {
+              "type": "strong"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "text": " "
+        },
+        {
+          "type": "text",
+          "text": "c",
+          "marks": [
+            {
+              "type": "link",
+              "attrs": {
+                "href": "https://x",
+                "target": "_blank",
+                "rel": "noopener noreferrer nofollow",
+                "class": null
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

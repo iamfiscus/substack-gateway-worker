@@ -1,0 +1,1 @@
+{"content": [{"attrs": {"level": 1, "textAlign": null}, "content": [{"text": "spaced heading", "type": "text"}], "type": "heading"}, {"attrs": {"level": 6, "textAlign": null}, "content": [{"text": "six", "type": "text"}], "type": "heading"}, {"attrs": {"textAlign": null}, "content": [{"text": "####### seven", "type": "text"}], "type": "paragraph"}], "type": "doc"}

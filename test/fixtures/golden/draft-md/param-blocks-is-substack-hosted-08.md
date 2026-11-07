@@ -1,0 +1,1 @@
+https://bucketeer-x.substackcdn.com/x.png

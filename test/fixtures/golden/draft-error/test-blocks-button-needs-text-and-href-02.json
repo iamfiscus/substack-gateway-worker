@@ -1,0 +1,1 @@
+{"error": "DraftMarkdownError", "line": 3, "message": "::button needs a text and an href: ::button[Text]{href=URL}, where URL may be subscribe, share or comment", "str": "line 3: ::button needs a text and an href: ::button[Text]{href=URL}, where URL may be subscribe, share or comment"}

@@ -1,0 +1,1 @@
+{"error": "DraftMarkdownError", "line": 1, "message": ":::align needs one of {left|center|right|justify|default}, e.g. :::align{center}", "str": "line 1: :::align needs one of {left|center|right|justify|default}, e.g. :::align{center}"}

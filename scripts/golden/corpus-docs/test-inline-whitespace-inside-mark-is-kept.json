@@ -1,0 +1,30 @@
+{
+  "type": "doc",
+  "content": [
+    {
+      "type": "paragraph",
+      "attrs": {
+        "textAlign": null
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "x"
+        },
+        {
+          "type": "text",
+          "text": " bold ",
+          "marks": [
+            {
+              "type": "strong"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "text": "y"
+        }
+      ]
+    }
+  ]
+}

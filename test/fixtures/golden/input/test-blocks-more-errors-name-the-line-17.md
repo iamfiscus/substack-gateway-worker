@@ -1,0 +1,4 @@
+A
+
+> :::align{center}
+> B

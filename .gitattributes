@@ -1,0 +1,4 @@
+# Golden inputs and outputs are byte-exact (CRLF, no trailing newline): never normalise.
+scripts/golden/corpus/** -text
+scripts/golden/corpus-docs/** -text
+test/fixtures/golden/** -text

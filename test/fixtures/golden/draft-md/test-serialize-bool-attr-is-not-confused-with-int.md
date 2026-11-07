@@ -1,0 +1,29 @@
+```substack-node
+{
+  "type": "ordered_list",
+  "attrs": {
+    "start": true,
+    "type": null,
+    "order": 1
+  },
+  "content": [
+    {
+      "type": "list_item",
+      "content": [
+        {
+          "type": "paragraph",
+          "attrs": {
+            "textAlign": null
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "a"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```

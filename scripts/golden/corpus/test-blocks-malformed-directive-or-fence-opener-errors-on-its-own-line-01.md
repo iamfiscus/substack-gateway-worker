@@ -1,0 +1,1 @@
+::defaults {align=justify}
