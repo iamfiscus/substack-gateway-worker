@@ -1,6 +1,7 @@
 // BDD runner: binds pytest-bdd-style step definitions (parse patterns) to the
 // steps of a .feature file, via @amiceli/vitest-cucumber.
 
+import { readFile } from 'node:fs/promises';
 import { describeFeature, loadFeature } from '@amiceli/vitest-cucumber';
 
 export type StepExtra = { docString: string | null };
@@ -53,12 +54,80 @@ export type RunFeatureOptions<W> = {
 
 type Keyword = 'Given' | 'When' | 'Then' | 'And' | 'But';
 
+// vitest-cucumber compiles every step text into a RegExp (escaping only `?`)
+// and reads `{word}` as a parameter expression, so step text such as
+// `"**bold**"` throws "Nothing to repeat". Steps are therefore handed to it
+// under an alias with those characters swapped for their fullwidth lookalikes;
+// the registry here always matches the original text.
+const REGEX_HAZARDS: Record<string, string> = {
+  '\\': '\uff3c',
+  '*': '\uff0a',
+  '+': '\uff0b',
+  '(': '\uff08',
+  ')': '\uff09',
+  '[': '\uff3b',
+  ']': '\uff3d',
+  '{': '\uff5b',
+  '}': '\uff5d',
+};
+
+function regexInert(text: string): string {
+  return text.replace(/[\\*+()[\]{}]/g, (c) => REGEX_HAZARDS[c] ?? c);
+}
+
+type DocString = { stepLine: string; text: string };
+
+/**
+ * The doc strings of a feature file, in file order, each with the (trimmed)
+ * step line it follows and the indentation of its opening delimiter removed.
+ * vitest-cucumber's own copy is lossy: it drops doc-string lines starting with
+ * `#` (it reads them as comments), trims every line, and lets ``` close a """
+ * doc string. A doc string here closes only on its own delimiter.
+ */
+function rawDocStrings(source: string): DocString[] {
+  const docs: DocString[] = [];
+  let open: { stepLine: string; indent: number; delimiter: string; lines: string[] } | null = null;
+  let previous = '';
+  for (const line of source.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (open) {
+      if (trimmed.startsWith(open.delimiter)) {
+        docs.push({ stepLine: open.stepLine, text: open.lines.join('\n') });
+        open = null;
+      } else {
+        const indent = /^[ \t]*/.exec(line)?.[0].length ?? 0;
+        open.lines.push(line.slice(Math.min(indent, open.indent)));
+      }
+    } else if (trimmed.startsWith('"""') || trimmed.startsWith('```')) {
+      const indent = line.length - line.trimStart().length;
+      open = { stepLine: previous, indent, delimiter: trimmed.slice(0, 3), lines: [] };
+    } else if (trimmed) {
+      previous = trimmed;
+    }
+  }
+  return docs;
+}
+
 export async function runFeature<W>(
   path: string,
   steps: StepRegistry<W>,
   opts: RunFeatureOptions<W>,
 ): Promise<void> {
   const feature = await loadFeature(path);
+  // Background and Rule blocks are not supported here, so every doc string
+  // belongs to a scenario step; pair them up in file order by step line.
+  const docs = rawDocStrings(await readFile(path, 'utf8'));
+  const docOf = new Map<object, string>();
+  let next = 0;
+  for (const scenario of feature.scenarii) {
+    for (const s of scenario.steps) {
+      const doc = docs[next];
+      if (doc && doc.stepLine === `${s.type} ${s.details}`) {
+        docOf.set(s, doc.text);
+        next++;
+      }
+    }
+  }
   const skip = opts.skip ?? {};
   for (const name of Object.keys(skip)) {
     if (!feature.getScenarioByName(name)) throw new Error(`skip: no scenario named "${name}"`);
@@ -71,13 +140,15 @@ export async function runFeature<W>(
         const world = skipped ? (undefined as W) : opts.world();
         for (const s of scenario.steps) {
           const keyword = s.type as Keyword;
+          const text = s.details;
+          (s as { details: string }).details = regexInert(text);
           if (skipped) {
             fns[keyword](s.details, () => {});
             continue;
           }
-          const { def, args } = matchStep(steps, s.details);
+          const { def, args } = matchStep(steps, text);
           fns[keyword](s.details, async () => {
-            await def.run(world, args, { docString: s.docStrings });
+            await def.run(world, args, { docString: docOf.get(s) ?? null });
           });
         }
       });
