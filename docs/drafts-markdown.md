@@ -55,21 +55,21 @@ atomic lock against an edit that lands between the two requests.
 
 ## Quick reference
 
-| Element           | Markdown                                                                      |
-| ----------------- | ----------------------------------------------------------------------------- |
-| Horizontal rule   | `---` on its own line                                                         |
-| Button            | `::button[Subscribe now]{href=subscribe}` (also `share`, `comment`, or a URL) |
-| Image size        | `![alt](src){size=normal}` (also `large`, `full`)                             |
-| Image watermark   | `![alt](src){watermark}` or `{watermark=8%}`                                  |
-| Default alignment | `::defaults{align=justify}` as the first block                                |
-| Aligned section   | `:::align{center}` ... `:::`                                                  |
-| Callout           | `:::callout` ... `:::`                                                        |
-| Pullquote         | `\|> text`                                                                    |
-| Blockquote        | `> text`                                                                      |
-| LaTeX             | `$$` ... `$$`                                                                 |
-| Code              | ` ```lang ` ... ` ``` `                                                       |
-| Datawrapper chart | ` ```datawrapper ` + chart URL ... ` ``` `                                    |
-| Anything else     | ` ```substack-node ` + JSON ... ` ``` ` (move or delete only)                 |
+| Element | Markdown |
+|---|---|
+| Horizontal rule | `---` on its own line |
+| Button | `::button[Subscribe now]{href=subscribe}` (also `share`, `comment`, or a URL) |
+| Image size | `![alt](src){size=normal}` (also `large`, `full`) |
+| Image watermark | `![alt](src){watermark}` or `{watermark=8%}` |
+| Default alignment | `::defaults{align=justify}` as the first block |
+| Aligned section | `:::align{center}` ... `:::` |
+| Callout | `:::callout` ... `:::` |
+| Pullquote | `\|> text` |
+| Blockquote | `> text` |
+| LaTeX | `$$` ... `$$` |
+| Code | ```` ```lang ```` ... ```` ``` ```` |
+| Datawrapper chart | ```` ```datawrapper ```` + chart URL ... ```` ``` ```` |
+| Anything else | ```` ```substack-node ```` + JSON ... ```` ``` ```` (move or delete only) |
 
 ## Text, headings, lists, quotes
 
@@ -93,13 +93,13 @@ atomic lock against an edit that lands between the two requests.
 
 ## Inline formatting
 
-| Markdown                      | Result                                                      |
-| ----------------------------- | ----------------------------------------------------------- |
-| `**text**`                    | bold                                                        |
-| `*text*`                      | italic (`_text_` is not italic: underscores are plain text) |
-| `~~text~~`                    | strikethrough                                               |
-| `` `text` ``                  | inline code (see below for combining it with other marks)   |
-| `[text](https://example.com)` | link                                                        |
+| Markdown | Result |
+|---|---|
+| `**text**` | bold |
+| `*text*` | italic (`_text_` is not italic: underscores are plain text) |
+| `~~text~~` | strikethrough |
+| `` `text` `` | inline code (see below for combining it with other marks) |
+| `[text](https://example.com)` | link |
 
 Bold, italic and strikethrough combine freely (`***both***`, `**~~x~~**`) and can
 sit inside a link text (`[**bold link**](url)`). A delimiter run that has
@@ -169,15 +169,15 @@ An image is a line of its own:
 ### Watermark
 
 `{watermark}` overlays the publication's logo, the way the web editor's
-"watermark" button does. It is an _instruction_: it makes the gateway call
+"watermark" button does. It is an *instruction*: it makes the gateway call
 Substack's watermark endpoint while writing the draft.
 
-| Attribute                                                      | Meaning                                                                                                                                                    |
-| -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `watermark`                                                    | default watermark: 6 % of the image width, top-right, opacity 65                                                                                           |
-| `watermark=N%`                                                 | logo width as a percentage of the image width (above 0, up to 100; the logo is kept inside the image, so it is never larger than the image's shorter side) |
-| `watermark-pos=top-right\|top-left\|bottom-right\|bottom-left` | corner (default `top-right`)                                                                                                                               |
-| `watermark-opacity=0..100`                                     | opacity (default 65)                                                                                                                                       |
+| Attribute | Meaning |
+|---|---|
+| `watermark` | default watermark: 6 % of the image width, top-right, opacity 65 |
+| `watermark=N%` | logo width as a percentage of the image width (above 0, up to 100; the logo is kept inside the image, so it is never larger than the image's shorter side) |
+| `watermark-pos=top-right\|top-left\|bottom-right\|bottom-left` | corner (default `top-right`) |
+| `watermark-opacity=0..100` | opacity (default 65) |
 
 `watermark-pos` and `watermark-opacity` are errors without `watermark`.
 
@@ -189,7 +189,7 @@ error naming the image, and nothing is sent to Substack's watermark endpoint:
 upload it with `upload_image` first, or leave the watermark off.
 
 A watermarked image is stored with two URLs: the watermarked picture and the
-original. `get_draft` shows both, as _state_:
+original. `get_draft` shows both, as *state*:
 
 ```markdown
 ![Alt](https://.../watermarked_1536x1024.png){size=large original=https://.../original_1536x1024.png}
@@ -234,7 +234,6 @@ paragraphs have (on a tie, none).
 A centered paragraph.
 
 ## A centered heading
-
 :::
 ```
 
@@ -274,7 +273,7 @@ print("hello")
 The text after the opening backticks is the language. The body is kept exactly as
 written. A code block whose text contains a line starting with three backticks is
 returned as a `substack-node` block. Substack's per-block id is shown as an
-attribute and must be kept: ` ```python {nodeId=abc123} `.
+attribute and must be kept: ```` ```python {nodeId=abc123} ````.
 
 **LaTeX**
 
@@ -300,7 +299,7 @@ https://www.datawrapper.de/_/aBcDe/
 
 The body is one published chart URL (`datawrapper.de/_/<id>` or `dwcdn.net/<id>`);
 an empty body, several URLs or any other URL (such as the `app.datawrapper.de`
-editor link) is an error naming the fence's line. This is an _instruction_:
+editor link) is an error naming the fence's line. This is an *instruction*:
 Substack's embed endpoint is asked for the chart's metadata while the draft is
 written. A chart already in a draft comes back from `get_draft` as a
 `substack-node` block, not as a `datawrapper` fence.
@@ -339,19 +338,19 @@ and harmless.
 
 ## Instructions and state
 
-Some syntax is an _instruction_: it makes the gateway do something while the
-draft is written. What `get_draft` returns is _state_: it reproduces the stored
+Some syntax is an *instruction*: it makes the gateway do something while the
+draft is written. What `get_draft` returns is *state*: it reproduces the stored
 nodes and triggers nothing.
 
-| Syntax                   | Kind        | What happens on write                                    |
-| ------------------------ | ----------- | -------------------------------------------------------- |
-| `![..](external-url)`    | instruction | the image is uploaded to Substack                        |
-| `{watermark...}`         | instruction | the watermark is generated (see [Watermark](#watermark)) |
-| ` ```datawrapper ` + URL | instruction | the chart's metadata is fetched                          |
-| `![..](substack-url)`    | state       | kept as is                                               |
-| `{original=URL}`         | state       | stored as the image's non-watermarked source             |
-| `substack-node` fence    | state       | stored as given                                          |
-| everything else          | state       | stored as given                                          |
+| Syntax | Kind | What happens on write |
+|---|---|---|
+| `![..](external-url)` | instruction | the image is uploaded to Substack |
+| `{watermark...}` | instruction | the watermark is generated (see [Watermark](#watermark)) |
+| ```` ```datawrapper ```` + URL | instruction | the chart's metadata is fetched |
+| `![..](substack-url)` | state | kept as is |
+| `{original=URL}` | state | stored as the image's non-watermarked source |
+| `substack-node` fence | state | stored as given |
+| everything else | state | stored as given |
 
 So a `get_draft` result written back unchanged does not upload, watermark or
 fetch anything.
@@ -359,21 +358,21 @@ fetch anything.
 ## Escaping
 
 A backslash before any ASCII punctuation character makes it literal: `\*`, `\[`,
-`\#`, `\\`. `get_draft` escapes ``\ * ` [ ] ~ { }`` inside text for you, and puts a
+`\#`, `\\`. `get_draft` escapes `` \ * ` [ ] ~ { } `` inside text for you, and puts a
 backslash in front of a line that would otherwise open a block (`#`, `>`, `|>`,
-`-`, `+`, `1.`, `::`, `$$`, ` ``` `, `!`). Write the same escapes when your
+`-`, `+`, `1.`, `::`, `$$`, ```` ``` ````, `!`). Write the same escapes when your
 text needs them.
 
-To write a line that _looks_ like dialect syntax as plain text, start it with a
+To write a line that *looks* like dialect syntax as plain text, start it with a
 backslash:
 
-````markdown
+```markdown
 \::button[this stays text]{href=subscribe}
 
 \:::align{center}
 
 \```not a fence
-````
+```
 
 This matters because a line that starts with a directive name (`::button`,
 `::defaults`, `:::align`, `:::callout`) or with three backticks, and is not valid
@@ -384,10 +383,10 @@ container is an error as well (write `\:::` for literal text).
 
 ## Errors and conflicts
 
-| Situation                                                                                                                                                                                                                                                               | REST                                                    | MCP                                                                                                 |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| Malformed dialect (unclosed `:::align` / `:::callout` or fence, `::defaults` not the first block, a malformed directive or attribute, an invalid `substack-node` fence, a `datawrapper` fence without one published chart URL, a watermark on an image of unknown size) | `400`, `detail` starts with `line N:` for syntax errors | tool error with the same message                                                                    |
-| `expected_updated_at` differs from the draft's current `updated_at`                                                                                                                                                                                                     | `409`; nothing is written                               | tool error saying the draft changed since it was read and must be fetched again; nothing is written |
+| Situation | REST | MCP |
+|---|---|---|
+| Malformed dialect (unclosed `:::align` / `:::callout` or fence, `::defaults` not the first block, a malformed directive or attribute, an invalid `substack-node` fence, a `datawrapper` fence without one published chart URL, a watermark on an image of unknown size) | `400`, `detail` starts with `line N:` for syntax errors | tool error with the same message |
+| `expected_updated_at` differs from the draft's current `updated_at` | `409`; nothing is written | tool error saying the draft changed since it was read and must be fetched again; nothing is written |
 
 Syntax errors name the 1-based line of the input, so an agent can fix the exact
 spot. After a conflict, call `get_draft` again, apply the edit to the new body and

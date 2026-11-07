@@ -1,7 +1,6 @@
 // Routes of gateway_drafts_rest/router.py (upstream bc2e875).
 
 import { createRoute, z } from '@hono/zod-openapi';
-import type { GatewayContext } from '../context';
 import { DraftMarkdownError } from '../converters/dialect/errors';
 import { InvalidCursorError } from '../drafts/cursor';
 import {
@@ -23,6 +22,7 @@ import {
   ScheduleDraftResponse,
   scheduleDraftResponse,
   UpdateDraftRequest,
+  warnTo,
 } from '../schemas/drafts';
 import {
   aiDetection,
@@ -53,10 +53,6 @@ const jsonBody = <T extends z.ZodType>(schema: T) => ({
   required: true,
   content: { 'application/json': { schema } },
 });
-
-/** Serializer warnings go to the request's logger, tagged with its id. */
-const warnTo = (ctx: GatewayContext) => (message: string) =>
-  ctx.log.warn(message, { request_id: ctx.requestId });
 
 /** Upstream's 400 (malformed dialect) and 409 (stale `expected_updated_at`). */
 function mapDraftErrors(err: unknown): never {

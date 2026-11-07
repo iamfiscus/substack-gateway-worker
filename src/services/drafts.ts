@@ -44,11 +44,30 @@ const ISO_DATE = /^(\d{4})-?(\d{2})-?(\d{2})/;
 const ISO_TIME = /^(\d{2})(?::?(\d{2})(?::?(\d{2})(?:[.,]\d+)?)?)?/;
 const ISO_OFFSET = /^([+-])(\d{2})(?::?(\d{2})(?::?(\d{2})(?:[.,]\d+)?)?)?$/;
 
-function daysInMonth(year: number, month: number): number {
-  return new Date(Date.UTC(year, month, 0)).getUTCDate();
+/** Epoch ms of a UTC wall time. `Date.UTC` maps years 0-99 to 1900-1999; this does not. */
+function utcEpoch(year: number, month: number, day: number, h = 0, mi = 0, s = 0): number {
+  const d = new Date(0);
+  d.setUTCFullYear(year, month - 1, day);
+  d.setUTCHours(h, mi, s, 0);
+  return d.getTime();
 }
 
-/** Epoch milliseconds of an ISO-8601 string, or null when Python would reject it. */
+function daysInMonth(year: number, month: number): number {
+  return new Date(utcEpoch(year, month + 1, 0)).getUTCDate();
+}
+
+/** Python's own message for year 0 (MINYEAR is 1). */
+class YearOutOfRangeError extends Error {
+  constructor() {
+    super('year 0 is out of range');
+    this.name = 'ValueError';
+  }
+}
+
+/**
+ * Epoch milliseconds of an ISO-8601 string, or null when Python would reject it
+ * as malformed. Throws YearOutOfRangeError for year 0.
+ */
 function parseIsoformat(text: string): number | null {
   const d = ISO_DATE.exec(text);
   if (!d) return null;
@@ -56,6 +75,7 @@ function parseIsoformat(text: string): number | null {
   const dateLen = d[0].length;
   if (dateLen !== 8 && dateLen !== 10) return null;
   const [year, month, day] = [Number(d[1]), Number(d[2]), Number(d[3])];
+  if (year === 0) throw new YearOutOfRangeError();
   if (month < 1 || month > 12 || day < 1 || day > daysInMonth(year, month)) return null;
   let rest = text.slice(dateLen);
   let [hour, minute, second, offsetMs] = [0, 0, 0, 0];
@@ -74,7 +94,7 @@ function parseIsoformat(text: string): number | null {
       offsetMs = (o[1] === '-' ? -1 : 1) * ((oh * 60 + om) * 60 + os) * 1000;
     }
   }
-  return Date.UTC(year, month - 1, day, hour, minute, second) - offsetMs;
+  return utcEpoch(year, month, day, hour, minute, second) - offsetMs;
 }
 
 function formatTriggerAt(epochMs: number): string {
@@ -96,7 +116,11 @@ export function toTriggerAt(value: string | Date): string {
 
 /** True when `toTriggerAt` accepts `value`. */
 export function isTriggerAt(value: string): boolean {
-  return parseIsoformat(value.replaceAll('Z', '+00:00')) !== null;
+  try {
+    return parseIsoformat(value.replaceAll('Z', '+00:00')) !== null;
+  } catch {
+    return false;
+  }
 }
 
 const UPDATE_FIELD_MAP = {

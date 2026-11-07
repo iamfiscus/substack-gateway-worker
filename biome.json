@@ -8,6 +8,7 @@
       "!.wrangler",
       "!test/fixtures",
       "!test/features",
+      "!docs/drafts-markdown.md",
       "!scripts/golden/corpus",
       "!scripts/golden/corpus-docs",
       "!package-lock.json"

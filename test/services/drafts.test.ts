@@ -258,6 +258,17 @@ describe('toTriggerAt', () => {
     expect(toTriggerAt(input)).toBe(expected);
   });
 
+  it('keeps years 1-99 as written (Date.UTC would map them to 19xx)', () => {
+    expect(toTriggerAt('0026-09-16T00:00:00')).toBe('0026-09-16T00:00:00.000Z');
+    expect(toTriggerAt('0004-02-29')).toBe('0004-02-29T00:00:00.000Z');
+    expect(() => toTriggerAt('0026-02-29')).toThrow(/^Invalid isoformat string: /);
+  });
+
+  it("rejects year 0 with Python's message", () => {
+    expect(() => toTriggerAt('0000-01-01')).toThrow(/^year 0 is out of range$/);
+    expect(() => toTriggerAt('0000-01-01T00:00:00Z')).toThrow('year 0 is out of range');
+  });
+
   it('formats a Date in UTC', () => {
     expect(toTriggerAt(new Date('2026-09-16T18:24:00.500Z'))).toBe('2026-09-16T18:24:00.000Z');
   });

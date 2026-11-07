@@ -2,6 +2,7 @@
 // (upstream bc2e875).
 
 import { z } from '@hono/zod-openapi';
+import type { GatewayContext } from '../context';
 import { draftBodyToMarkdown } from '../converters/draftMarkdown';
 import type { UploadedImage } from '../services/images';
 
@@ -196,6 +197,12 @@ export function draftsListResponse(
 export function createDraftResponse(draft: SubstackDraftCreated): CreateDraftResponse {
   return { id: draft.id, uuid: draft.uuid };
 }
+
+/** Serializer warnings go to the request's logger, tagged with its request id. */
+export const warnTo =
+  (ctx: GatewayContext) =>
+  (message: string): void =>
+    ctx.log.warn(message, { request_id: ctx.requestId });
 
 /**
  * The stored body comes back as dialect Markdown. `warn` receives serializer

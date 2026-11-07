@@ -13,6 +13,7 @@ import {
   imageUploadResult,
   prepublishResponse,
   scheduleDraftResponse,
+  warnTo,
 } from '../schemas/drafts';
 import {
   aiDetection,
@@ -53,9 +54,6 @@ const draftId = z.object({ draft_id: z.number().int() });
 const optionalText = z.string().nullish();
 
 export function registerDraftsTools(server: McpServer, _ctx: GatewayContext): void {
-  const warnTo = (ctx: GatewayContext) => (message: string) =>
-    ctx.log.warn(message, { request_id: ctx.requestId });
-
   mcpTool(
     server,
     'list_drafts',
