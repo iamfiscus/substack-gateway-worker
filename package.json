@@ -15,6 +15,7 @@
     "golden": "cd upstream && uv run python ../scripts/golden/generate.py"
   },
   "dependencies": {
+    "@hono/swagger-ui": "^0.6.2",
     "@hono/zod-openapi": "^1.6.3",
     "@modelcontextprotocol/server": "^2.4.0",
     "hono": "^4.13.17",

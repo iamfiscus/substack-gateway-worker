@@ -1,9 +1,11 @@
 // Hono app shell: request id, gateway-key auth, `/`, `/api`, `/mcp`.
 // Port of substack_gateway/app_factory.py + api_app.py (upstream bc2e875).
 
+import { swaggerUI } from '@hono/swagger-ui';
 import { OpenAPIHono } from '@hono/zod-openapi';
-import { Hono } from 'hono';
+import type { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import pkg from '../package.json';
 import { ownerFeatures } from './auth/features';
 import { type AuthInfo, authenticateGatewayKey, parseGatewayKeys } from './auth/gatewayKey';
 import { type CredentialResolver, SecretCredentialResolver } from './auth/resolver';
@@ -97,7 +99,7 @@ export function createApp(opts: CreateAppOptions = {}): Hono<AppEnv> {
   // Throws on a duplicate single provider: a startup error, as upstream.
   const providers = composeExtensions(extensions);
   const fetcher = opts.fetcher ?? providers.fetcher ?? defaultFetcher;
-  const app = new Hono<AppEnv>();
+  const app = new OpenAPIHono<AppEnv>();
 
   // First, so browser preflights (which carry no Authorization) are answered.
   app.use('*', cors());
@@ -155,6 +157,13 @@ export function createApp(opts: CreateAppOptions = {}): Hono<AppEnv> {
   app.get('/', rootHandler(extensions));
 
   app.route('/api', createApi(extensions));
+  // Not in PUBLIC_PATHS: open without GATEWAY_API_KEYS, key-gated with it.
+  // Swagger UI loads its JS/CSS from the jsDelivr CDN (as FastAPI's /docs does).
+  app.doc31('/api/openapi.json', {
+    openapi: '3.1.0',
+    info: { title: 'Substack Gateway', version: pkg.version },
+  });
+  app.get('/api/docs', swaggerUI({ url: '/api/openapi.json' }));
 
   const registration = { extensionNames: extensions.map((e) => e.name) };
   for (const ext of extensions) ext.registerApp?.(app, registration);
