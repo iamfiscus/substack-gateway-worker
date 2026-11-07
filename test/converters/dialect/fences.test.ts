@@ -1,9 +1,12 @@
 // Port of upstream packages/gateway_drafts/tests/test_datawrapper_url.py and
 // test_draft_markdown_latex.py (bc2e875), at the level of fences.ts. The LaTeX
 // tests that need the full Markdown converter (blocks among paragraphs, round
-// trips) come with blocks.ts in Task 13; here the same inputs go through the
-// fence functions. The fence-only goldens are checked with a minimal line
-// driver that does what blocks.py does with fences.
+// trips) are in draftMarkdown.latex.test.ts; here the same inputs go through
+// the fence functions. The fence-only goldens are checked with a minimal line
+// driver that feeds lines to the fence functions. It is not blocks.py: it skips
+// every other block rule, its flushing and its dispatch order, so it only suits
+// inputs made of fences. The real parser runs every golden in
+// draftDoc.golden.test.ts.
 
 import { afterEach, describe, expect, it } from 'vitest';
 import { DraftMarkdownError } from '../../../src/converters/dialect/errors';
@@ -34,7 +37,7 @@ function thrown(fn: () => unknown): DraftMarkdownError {
   throw new Error('expected an exception');
 }
 
-/** The fence handling of blocks.py `_Parser._line`, with other lines ignored. */
+/** Fence lines only: open, collect and close fences; every other line is ignored. */
 function parseFences(markdown: string): Node[] {
   const lines = markdown.replaceAll('\r\n', '\n').replaceAll('\r', '\n').split('\n');
   const nodes: Node[] = [];

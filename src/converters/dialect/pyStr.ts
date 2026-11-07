@@ -22,11 +22,25 @@ export function isSpace(ch: string): boolean {
  * UTF-16 unit); without, strips `isspace()` characters.
  */
 export function pyStrip(text: string, chars?: string): string {
+  return strip(text, chars, true, true);
+}
+
+/** Python `text.lstrip(chars)` (see pyStrip). */
+export function pyLstrip(text: string, chars?: string): string {
+  return strip(text, chars, true, false);
+}
+
+/** Python `text.rstrip(chars)` (see pyStrip). */
+export function pyRstrip(text: string, chars?: string): string {
+  return strip(text, chars, false, true);
+}
+
+function strip(text: string, chars: string | undefined, left: boolean, right: boolean): string {
   const drop = chars === undefined ? isSpace : (ch: string) => chars.includes(ch);
   let start = 0;
   let end = text.length;
-  while (start < end && drop(text.charAt(start))) start++;
-  while (end > start && drop(text.charAt(end - 1))) end--;
+  if (left) while (start < end && drop(text.charAt(start))) start++;
+  if (right) while (end > start && drop(text.charAt(end - 1))) end--;
   return text.slice(start, end);
 }
 
@@ -61,14 +75,20 @@ function digitValue(cp: number): number {
  */
 export function pyIntFromDigits(raw: string): number {
   const negative = raw.startsWith('-');
-  let ascii = '';
-  for (const ch of negative ? raw.slice(1) : raw) {
-    const cp = ch.codePointAt(0) as number;
-    ascii += cp >= 0x30 && cp <= 0x39 ? ch : String(digitValue(cp));
-  }
+  const ascii = asciiDigits(negative ? raw.slice(1) : raw);
   if (ascii.length > INT_MAX_STR_DIGITS) throw new PyValueError(intDigitLimitMessage(ascii.length));
   const value = Number(ascii);
   return negative && value !== 0 ? -value : value;
+}
+
+/** `text` with every Unicode decimal digit replaced by its ASCII digit. */
+export function asciiDigits(text: string): string {
+  let ascii = '';
+  for (const ch of text) {
+    const cp = ch.codePointAt(0) as number;
+    ascii += cp >= 0x30 && cp <= 0x39 ? ch : DIGIT.test(ch) ? String(digitValue(cp)) : ch;
+  }
+  return ascii;
 }
 
 /** Defines `key` as an own property, so that `__proto__` is data, not the prototype. */
