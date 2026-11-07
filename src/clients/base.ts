@@ -64,10 +64,12 @@ export class SubstackHTTPBase {
   }
 
   private async request(method: string, path: string, o: RequestOptions = {}): Promise<unknown> {
-    const headers = new Headers({
-      cookie: this.cookie,
-      accept: 'application/json',
-    });
+    let headers: Headers;
+    try {
+      headers = new Headers({ cookie: this.cookie, accept: 'application/json' });
+    } catch {
+      throw new SubstackAPIError(400, 'Invalid credentials: cookie contains invalid characters');
+    }
     if (this.requestId) headers.set('x-request-id', this.requestId);
     let body: string | undefined;
     if (o.json !== undefined) {
@@ -75,15 +77,24 @@ export class SubstackHTTPBase {
       headers.set('content-type', 'application/json');
     }
     const signal = AbortSignal.timeout(this.timeoutMs);
-    const req = new Request(this.url(path, o.query), { method, headers, body, signal });
+    // Never follow redirects: they could carry the session cookies to another host.
+    const req = new Request(this.url(path, o.query), {
+      method,
+      headers,
+      body,
+      signal,
+      redirect: 'manual',
+    });
 
     let status: number;
     let text: string;
+    let location: string | null;
     try {
       // A fetcher may ignore the signal, so race it against the abort.
       const res = await abortable(signal, this.fetcher(req));
       this.logSetCookie(res);
       status = res.status;
+      location = res.headers.get('location');
       text = await abortable(signal, res.text());
     } catch (err) {
       throw new SubstackAPIError(502, `Network error: ${errMessage(err)}`);
@@ -94,6 +105,12 @@ export class SubstackHTTPBase {
     }
     if (status === 403) {
       throw new SubstackAuthError(403, 'Forbidden: insufficient permissions for this resource');
+    }
+    if (status >= 300 && status < 400) {
+      throw new SubstackAPIError(
+        status,
+        `Substack returned ${status}: ${redirectDetail(location)}`,
+      );
     }
     if (status < 200 || status > 299) {
       throw new SubstackAPIError(
@@ -131,6 +148,16 @@ function errorDetail(status: number, text: string): string {
   }
 }
 
+function redirectDetail(location: string | null): string {
+  if (!location) return 'redirect';
+  try {
+    const host = new URL(location).host;
+    return host ? `redirect to ${host}` : 'redirect';
+  } catch {
+    return 'redirect';
+  }
+}
+
 function errMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }
@@ -138,7 +165,10 @@ function errMessage(err: unknown): string {
 function abortable<T>(signal: AbortSignal, p: Promise<T>): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     const onAbort = () => reject(signal.reason ?? new Error('aborted'));
-    if (signal.aborted) return onAbort();
+    if (signal.aborted) {
+      p.catch(() => {});
+      return onAbort();
+    }
     signal.addEventListener('abort', onAbort, { once: true });
     p.then(
       (v) => {

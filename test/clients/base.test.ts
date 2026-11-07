@@ -117,6 +117,69 @@ describe('SubstackHTTPBase', () => {
   });
 });
 
+describe('SubstackHTTPBase hardening', () => {
+  it('never follows redirects and sets redirect: manual', async () => {
+    const f = createFakeSubstack({
+      'GET substack.com/api/v1/x': () =>
+        new Response(null, { status: 302, headers: { location: 'https://evil.example/x?q=1' } }),
+    });
+    const err = await mk(f)
+      .get('x')
+      .catch((e) => e);
+    expect(err).toBeInstanceOf(SubstackAPIError);
+    expect(err).toMatchObject({
+      status: 302,
+      message: 'Substack returned 302: redirect to evil.example',
+    });
+    expect(f.calls).toHaveLength(1);
+    expect((f.calls[0] as Request).redirect).toBe('manual');
+  });
+
+  it('redirect without a usable Location is just "redirect"', async () => {
+    const f = createFakeSubstack({
+      'GET substack.com/api/v1/x': () =>
+        new Response(null, { status: 301, headers: { location: '/rel' } }),
+    });
+    expect(
+      await mk(f)
+        .get('x')
+        .catch((e) => e),
+    ).toMatchObject({
+      status: 301,
+      message: 'Substack returned 301: redirect',
+    });
+  });
+
+  it('pre-aborted timeout (0ms) yields 502 with no unhandled rejection', async () => {
+    const unhandled: unknown[] = [];
+    const h = (e: unknown) => unhandled.push(e);
+    process.on('unhandledRejection', h);
+    const f = createFakeSubstack({
+      'GET substack.com/api/v1/x': () => Promise.reject(new Error('late')),
+    });
+    const err = await mk(f, { timeoutMs: 0 })
+      .get('x')
+      .catch((e) => e);
+    await new Promise((r) => setTimeout(r, 20));
+    process.off('unhandledRejection', h);
+    expect(err).toMatchObject({ status: 502 });
+    expect(unhandled).toEqual([]);
+  });
+
+  it('rejects cookie values with CR/LF as 400', async () => {
+    const f = createFakeSubstack({ 'GET substack.com/api/v1/x': {} });
+    const err = await mk(f, { substackSid: 'a\r\nX: y' })
+      .get('x')
+      .catch((e) => e);
+    expect(err).toBeInstanceOf(SubstackAPIError);
+    expect(err).toMatchObject({
+      status: 400,
+      message: 'Invalid credentials: cookie contains invalid characters',
+    });
+    expect(f.calls).toHaveLength(0);
+  });
+});
+
 describe('SubstackClient / PublicationClient', () => {
   const opts = (fetcher: ReturnType<typeof createFakeSubstack>) => ({
     substackSid: 'S1',
