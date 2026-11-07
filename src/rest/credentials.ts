@@ -9,7 +9,7 @@ import {
   validateBearerCredentials,
 } from '../auth/credentials';
 import { type CredentialSource, checkFeature } from '../auth/features';
-import type { AppEnv, GatewayContext } from '../context';
+import { type AppEnv, type GatewayContext, scopeToSource } from '../context';
 import {
   errorResponse,
   GATEWAY_MISCONFIGURED,
@@ -70,7 +70,7 @@ export function restRoute<R extends RouteConfig = RouteConfig>(
   const wrapped = async (c: RouteContext<R>): Promise<Response> => {
     try {
       const resolved = await resolveRestCredentials(c);
-      const ctx = c.var.gw;
+      const ctx = scopeToSource(c.var.gw, resolved.source);
       checkFeature(feature, resolved.source, ctx.ownerFeatures);
       return await handler(c, { ...resolved, ctx });
     } catch (err) {

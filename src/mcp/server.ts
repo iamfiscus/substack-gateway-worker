@@ -5,7 +5,12 @@ import { createMcpHandler, McpServer } from '@modelcontextprotocol/server';
 import { z } from 'zod';
 import type { BearerCredentials } from '../auth/credentials';
 import { checkFeature } from '../auth/features';
-import { anonymousCredentials, type GatewayContext, type GatewayExtension } from '../context';
+import {
+  anonymousCredentials,
+  type GatewayContext,
+  type GatewayExtension,
+  scopeToSource,
+} from '../context';
 import { APPLICATION_NAME, OSS_VERSION } from '../features';
 import { registerCommentsTools } from './comments';
 import { resolveMcpCredentials } from './credentials';
@@ -148,14 +153,16 @@ export function mcpTool<S extends z.ZodObject>(
       try {
         const { token, ...args } = rawArgs as { token?: string | null };
         let creds: BearerCredentials;
+        let scoped = ctx;
         if (def.anonymous) {
           creds = anonymousCredentials(ctx);
         } else {
           const resolved = await resolveMcpCredentials(token, ctx.authInfo, ctx);
           checkFeature(def.feature, resolved.source, ctx.ownerFeatures);
           creds = resolved.creds;
+          scoped = scopeToSource(ctx, resolved.source);
         }
-        return toToolResult(await run(args as z.infer<S>, creds, ctx));
+        return toToolResult(await run(args as z.infer<S>, creds, scoped));
       } catch (err) {
         return {
           content: [{ type: 'text', text: `Error calling tool '${name}': ${errMessage(err)}` }],

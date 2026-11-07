@@ -1,14 +1,13 @@
 // Per-request gateway context shared by REST routes and MCP tools.
 
-import type { McpServer } from '@modelcontextprotocol/server';
 import type { BearerCredentials } from './auth/credentials';
+import type { CredentialSource } from './auth/features';
 import type { AuthInfo } from './auth/gatewayKey';
 import type { CredentialResolver } from './auth/resolver';
 import type { Fetcher } from './clients/base';
 import { PublicationClient } from './clients/publication';
 import { SubstackClient } from './clients/substack';
 import type { GatewayConfig, GatewayEnv } from './config';
-import type { ModuleInfo } from './features';
 import type { Logger } from './log';
 
 /** Port of gateway_core/caching.py `ValueCache`: implementations coalesce in-flight calls. */
@@ -26,7 +25,7 @@ export class NullValueCache implements ValueCache {
 /** One timeseries row as Substack returns it: `[dateBucket, ...values]`. */
 export type StatsRow = unknown[];
 
-/** Port of gateway_stats/cache.py `StatsCache`. Implementations arrive in Task 17. */
+/** Port of gateway_stats/cache.py `StatsCache`. Implementations: src/extensions/kvStatsCache.ts. */
 export interface StatsCache {
   readTimeseries(publicationUrl: string, series: string): Promise<Record<string, StatsRow>>;
   writeTimeseries(
@@ -51,15 +50,7 @@ export type GatewayContext = {
   log: Logger;
 };
 
-/**
- * Extension point. Stub: Task 17 adds the remaining hooks (caches, resolver,
- * fetcher, auth, registerApi/registerApp).
- */
-export type GatewayExtension = {
-  name: string;
-  moduleInfo?: ModuleInfo;
-  registerMcp?: (server: McpServer, ctx: GatewayContext) => void;
-};
+export type { GatewayExtension } from './extensions/types';
 
 /** Hono environment for the app and every router. */
 export type AppEnv = {
@@ -88,4 +79,13 @@ export function makeClients(ctx: GatewayContext, creds: BearerCredentials): Subs
 /** Port of gateway_mcp_common `_anonymous_credentials`: empty cookies, the base URL. */
 export function anonymousCredentials(ctx: GatewayContext): BearerCredentials {
   return { publication_url: ctx.config.substackBaseUrl, substack_sid: '', connect_sid: '' };
+}
+
+/**
+ * [C9, spec §10.4] A stats cache is keyed by publication_url alone, so only
+ * requests whose credentials came from the resolver (the owner's) may use it.
+ * Token-sourced requests get a context without it.
+ */
+export function scopeToSource(ctx: GatewayContext, source: CredentialSource): GatewayContext {
+  return source === 'resolved' || ctx.statsCache === null ? ctx : { ...ctx, statsCache: null };
 }

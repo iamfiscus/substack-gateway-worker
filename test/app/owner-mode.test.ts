@@ -311,3 +311,74 @@ describe('logging and default fetcher', () => {
     expect((seen[0] as Request).redirect).toBe('manual');
   });
 });
+
+describe('owner mode: MCP defence in depth', () => {
+  const CALL = { name: 'get_note', arguments: { note_id: 1 } };
+
+  it('keys unset + OWNER_* set + no token: MissingCredentialsError, zero Substack calls', async () => {
+    const { request, fake } = setup({ ...OWNER_ENV, GATEWAY_API_KEYS: undefined });
+    const { payload } = await mcpCall(request, '/mcp', 'tools/call', CALL, {});
+    const result = payload.result as ToolCallResult;
+    expect(result.isError).toBe(true);
+    expect(result.content[0]?.text).toContain("Error calling tool 'get_note'");
+    expect(result.content[0]?.text).toContain('No Substack credentials');
+    expect(fake.calls).toHaveLength(0);
+  });
+
+  it('never asks an extension resolver about an unauthenticated caller', async () => {
+    const resolve = vi.fn(async () => ({
+      publication_url: 'https://owner.substack.com',
+      substack_sid: 'owner-sid',
+      connect_sid: 'owner-connect',
+    }));
+    const fake = createFakeSubstack({});
+    const app = createApp({
+      fetcher: fake,
+      extensions: [{ name: 'greedy', credentialResolver: { resolve } }],
+    });
+    const res = await app.request(
+      '/mcp',
+      {
+        method: 'POST',
+        headers: MCP_HEADERS,
+        body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: CALL }),
+      },
+      TEST_ENV,
+    );
+    const result = (await readJsonRpc(res)).result as ToolCallResult;
+    expect(result.isError).toBe(true);
+    expect(result.content[0]?.text).toContain('No Substack credentials');
+    expect(resolve).not.toHaveBeenCalled();
+    expect(fake.calls).toHaveLength(0);
+  });
+
+  it('maps a resolver validation failure to the generic misconfigured text', async () => {
+    const fake = createFakeSubstack({});
+    const app = createApp({
+      fetcher: fake,
+      extensions: [
+        {
+          name: 'bad',
+          credentialResolver: {
+            resolve: async () =>
+              ({ publication_url: 'ftp://x', substack_sid: 'SECRET-SID' }) as never,
+          },
+        },
+      ],
+    });
+    const env = { ...TEST_ENV, GATEWAY_API_KEYS: 'ci:abc' };
+    const res = await app.request(
+      '/mcp',
+      {
+        method: 'POST',
+        headers: { ...MCP_HEADERS, ...KEY },
+        body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: CALL }),
+      },
+      env,
+    );
+    const result = (await readJsonRpc(res)).result as ToolCallResult;
+    expect(result.isError).toBe(true);
+    expect(result.content[0]?.text).toBe("Error calling tool 'get_note': gateway misconfigured");
+    expect(fake.calls).toHaveLength(0);
+  });
+});

@@ -10,6 +10,8 @@ import { type CredentialResolver, SecretCredentialResolver } from './auth/resolv
 import type { Fetcher } from './clients/base';
 import { type GatewayEnv, loadConfig } from './config';
 import { type AppEnv, type GatewayContext, type GatewayExtension, NullValueCache } from './context';
+import { assertOwnerModeFor, composeExtensions, resolveProvider } from './extensions/compose';
+import type { ComposedProviders } from './extensions/types';
 import { createLogger } from './log';
 import { handleMcpRequest } from './mcp/server';
 import { commentsRouter } from './rest/comments';
@@ -46,7 +48,21 @@ type KeyCheck =
   | { kind: 'ok'; auth: AuthInfo }
   | { kind: 'denied' | 'misconfigured' };
 
-async function checkGatewayKey(req: Request, raw: string | undefined): Promise<KeyCheck> {
+async function checkGatewayKey(
+  req: Request,
+  env: GatewayEnv,
+  authenticate: ComposedProviders['authenticate'],
+): Promise<KeyCheck> {
+  if (authenticate) {
+    // An extension's authenticate replaces the built-in gateway-key check.
+    try {
+      const auth = await authenticate(req, env);
+      return auth ? { kind: 'ok', auth } : { kind: 'denied' };
+    } catch {
+      return { kind: 'misconfigured' };
+    }
+  }
+  const raw = env.GATEWAY_API_KEYS;
   if (raw === undefined || raw.trim() === '') return { kind: 'off' };
   let keys: ReturnType<typeof parseGatewayKeys>;
   try {
@@ -60,7 +76,7 @@ async function checkGatewayKey(req: Request, raw: string | undefined): Promise<K
 }
 
 /** The `/api` sub-app: every REST router under `/v1`, with their OpenAPI routes. */
-export function createApi(): OpenAPIHono<AppEnv> {
+export function createApi(extensions: readonly GatewayExtension[] = []): OpenAPIHono<AppEnv> {
   const api = new OpenAPIHono<AppEnv>();
   api.route('/v1', healthRouter);
   api.route('/v1', meRouter);
@@ -71,18 +87,23 @@ export function createApi(): OpenAPIHono<AppEnv> {
   api.route('/v1', profilesRouter);
   api.route('/v1', statsRouter);
   api.route('/v1', draftsRouter);
+  const registration = { extensionNames: extensions.map((e) => e.name) };
+  for (const ext of extensions) ext.registerApi?.(api, registration);
   return api;
 }
 
 export function createApp(opts: CreateAppOptions = {}): Hono<AppEnv> {
-  const fetcher = opts.fetcher ?? defaultFetcher;
   const extensions = opts.extensions ?? [];
+  // Throws on a duplicate single provider: a startup error, as upstream.
+  const providers = composeExtensions(extensions);
+  const fetcher = opts.fetcher ?? providers.fetcher ?? defaultFetcher;
   const app = new Hono<AppEnv>();
 
   // First, so browser preflights (which carry no Authorization) are answered.
   app.use('*', cors());
   app.use('*', async (c, next) => {
     const env: GatewayEnv = c.env ?? {};
+    assertOwnerModeFor(providers, env);
     const config = loadConfig(env);
     const log = createLogger(config.logLevel);
     const requestId = c.req.header('x-request-id') || crypto.randomUUID();
@@ -91,9 +112,11 @@ export function createApp(opts: CreateAppOptions = {}): Hono<AppEnv> {
       env,
       config,
       fetcher,
-      valueCache: new NullValueCache(),
-      statsCache: null,
-      resolver: ownerResolver(env),
+      valueCache: providers.valueCache
+        ? resolveProvider(providers.valueCache, env)
+        : new NullValueCache(),
+      statsCache: providers.statsCache ? resolveProvider(providers.statsCache, env) : null,
+      resolver: providers.credentialResolver ?? ownerResolver(env),
       requestId,
       authInfo: null,
       ownerFeatures: ownerFeatures(env),
@@ -101,7 +124,7 @@ export function createApp(opts: CreateAppOptions = {}): Hono<AppEnv> {
     };
     c.set('gw', gw);
 
-    const key = await checkGatewayKey(c.req.raw, env.GATEWAY_API_KEYS);
+    const key = await checkGatewayKey(c.req.raw, env, providers.authenticate);
     if (key.kind === 'ok') gw.authInfo = key.auth;
     const finish = (res: Response): Response => {
       res.headers.set('X-Request-ID', requestId);
@@ -131,7 +154,10 @@ export function createApp(opts: CreateAppOptions = {}): Hono<AppEnv> {
 
   app.get('/', rootHandler(extensions));
 
-  app.route('/api', createApi());
+  app.route('/api', createApi(extensions));
+
+  const registration = { extensionNames: extensions.map((e) => e.name) };
+  for (const ext of extensions) ext.registerApp?.(app, registration);
 
   const mcp = (c: { req: { raw: Request }; var: { gw: GatewayContext } }) =>
     handleMcpRequest(c.req.raw, c.var.gw, extensions);
