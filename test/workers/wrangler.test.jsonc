@@ -1,0 +1,6 @@
+{
+  // Test-only Worker config for the workerd project: no `main`, tests import src/ directly.
+  "name": "substack-gateway-test",
+  "compatibility_date": "2026-08-22",
+  "compatibility_flags": ["nodejs_compat"]
+}

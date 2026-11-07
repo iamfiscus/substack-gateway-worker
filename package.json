@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "wrangler dev",
     "test": "vitest run --project node",
-    "test:workers": "vitest run --project workers --passWithNoTests",
+    "test:workers": "vitest run --project workers",
     "typecheck": "tsc --noEmit",
     "lint": "biome check .",
     "deploy": "wrangler deploy",
