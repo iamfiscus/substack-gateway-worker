@@ -164,6 +164,7 @@ export function registerDraftsTools(server: McpServer, _ctx: GatewayContext): vo
       inputSchema: draftId,
       annotations: writeAnnotations('Delete Draft', { destructive: true, idempotent: true }),
       feature: 'mcp:drafts:delete',
+      textResult: true,
       meta: toolMeta('drafts', 'DELETE /drafts/{draft_id}', ['drafts', 'write', 'delete']),
     },
     async (args, creds, ctx) => {
@@ -229,6 +230,7 @@ export function registerDraftsTools(server: McpServer, _ctx: GatewayContext): vo
       inputSchema: draftId,
       annotations: writeAnnotations('Unschedule Draft', { destructive: true, idempotent: true }),
       feature: 'mcp:drafts:unschedule',
+      textResult: true,
       meta: toolMeta('drafts', 'DELETE /drafts/{draft_id}/scheduled_release', [
         'drafts',
         'write',

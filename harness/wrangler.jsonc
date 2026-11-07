@@ -1,0 +1,24 @@
+{
+  // Private differential-parity harness Worker. NOT deployed by default:
+  // `npx wrangler deploy -c harness/wrangler.jsonc` needs Jd's approval (Task 20, Step 1).
+  // Set the bearer secret first: `npx wrangler secret put HARNESS_TOKEN -c harness/wrangler.jsonc`.
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "substack-gateway-harness",
+  "main": "worker.ts",
+  "compatibility_date": "2026-08-22",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "containers": [
+    {
+      "class_name": "HarnessSandbox",
+      "image": "./Dockerfile",
+      "image_build_context": "..",
+      "instance_type": "standard-1",
+      "max_instances": 1
+    }
+  ],
+  "durable_objects": {
+    "bindings": [{ "class_name": "HarnessSandbox", "name": "HARNESS" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["HarnessSandbox"] }]
+}

@@ -1,0 +1,7 @@
+# Build context for harness/Dockerfile.
+node_modules
+.wrangler
+upstream
+.dev.vars
+**/__pycache__
+.git

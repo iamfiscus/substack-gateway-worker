@@ -17,30 +17,6 @@ import { mcpTool, readAnnotations, TOKEN_NOTE, toolMeta, writeAnnotations } from
 export function registerNotesTools(server: McpServer, _ctx: GatewayContext): void {
   mcpTool(
     server,
-    'get_note',
-    {
-      description: `Retrieve a single Substack note by its numeric ID.${TOKEN_NOTE}`,
-      inputSchema: z.object({ note_id: z.number().int() }),
-      annotations: readAnnotations('Get Note'),
-      feature: 'mcp:notes:get',
-      meta: toolMeta('notes', 'GET /reader/comment/{note_id}', ['notes', 'read']),
-    },
-    (args, creds, ctx) => getNote(ctx, creds, { noteId: args.note_id }),
-  );
-  mcpTool(
-    server,
-    'list_note_replies',
-    {
-      description: `List the direct replies to a Substack note by its numeric ID.${TOKEN_NOTE}`,
-      inputSchema: z.object({ note_id: z.number().int() }),
-      annotations: readAnnotations('List Note Replies'),
-      feature: 'mcp:notes:replies:list',
-      meta: toolMeta('notes', 'GET /reader/comment/{note_id}/replies', ['notes', 'read']),
-    },
-    (args, creds, ctx) => listNoteReplies(ctx, creds, { noteId: args.note_id }),
-  );
-  mcpTool(
-    server,
     'create_note',
     {
       description: `Publish a new note to Substack from Markdown content, with an optional link attachment.${TOKEN_NOTE}`,
@@ -60,6 +36,7 @@ export function registerNotesTools(server: McpServer, _ctx: GatewayContext): voi
       inputSchema: z.object({ note_id: z.number().int() }),
       annotations: writeAnnotations('Delete Note', { destructive: true, idempotent: true }),
       feature: 'mcp:notes:delete',
+      textResult: true,
       meta: toolMeta('notes', 'DELETE /comment/{note_id}', ['notes', 'write', 'delete']),
     },
     async (args, creds, ctx) => {
@@ -69,12 +46,25 @@ export function registerNotesTools(server: McpServer, _ctx: GatewayContext): voi
   );
   mcpTool(
     server,
+    'get_note',
+    {
+      description: `Retrieve a single Substack note by its numeric ID.${TOKEN_NOTE}`,
+      inputSchema: z.object({ note_id: z.number().int() }),
+      annotations: readAnnotations('Get Note'),
+      feature: 'mcp:notes:get',
+      meta: toolMeta('notes', 'GET /reader/comment/{note_id}', ['notes', 'read']),
+    },
+    (args, creds, ctx) => getNote(ctx, creds, { noteId: args.note_id }),
+  );
+  mcpTool(
+    server,
     'like_note',
     {
       description: `Add a like to a Substack note by its numeric ID.${TOKEN_NOTE}`,
       inputSchema: z.object({ note_id: z.number().int() }),
       annotations: writeAnnotations('Like Note', { idempotent: true }),
       feature: 'mcp:notes:like',
+      textResult: true,
       meta: toolMeta('notes', 'POST /comment/{note_id}/reaction', ['notes', 'write']),
     },
     async (args, creds, ctx) => {
@@ -90,6 +80,7 @@ export function registerNotesTools(server: McpServer, _ctx: GatewayContext): voi
       inputSchema: z.object({ note_id: z.number().int() }),
       annotations: writeAnnotations('Unlike Note', { idempotent: true }),
       feature: 'mcp:notes:unlike',
+      textResult: true,
       meta: toolMeta('notes', 'DELETE /comment/{note_id}/reaction', ['notes', 'write']),
     },
     async (args, creds, ctx) => {
@@ -108,5 +99,17 @@ export function registerNotesTools(server: McpServer, _ctx: GatewayContext): voi
       meta: toolMeta('notes', 'POST /comment/feed/', ['notes', 'write']),
     },
     (args, creds, ctx) => replyToNote(ctx, creds, { parentId: args.note_id, body: args.body }),
+  );
+  mcpTool(
+    server,
+    'list_note_replies',
+    {
+      description: `List the direct replies to a Substack note by its numeric ID.${TOKEN_NOTE}`,
+      inputSchema: z.object({ note_id: z.number().int() }),
+      annotations: readAnnotations('List Note Replies'),
+      feature: 'mcp:notes:replies:list',
+      meta: toolMeta('notes', 'GET /reader/comment/{note_id}/replies', ['notes', 'read']),
+    },
+    (args, creds, ctx) => listNoteReplies(ctx, creds, { noteId: args.note_id }),
   );
 }

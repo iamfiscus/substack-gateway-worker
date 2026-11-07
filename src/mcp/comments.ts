@@ -30,30 +30,6 @@ export function registerCommentsTools(server: McpServer, _ctx: GatewayContext): 
   );
   mcpTool(
     server,
-    'get_post_comment',
-    {
-      description: `Fetch a single Substack post comment by its numeric ID.${TOKEN_NOTE}`,
-      inputSchema: z.object({ comment_id: z.number().int() }),
-      annotations: readAnnotations('Get Post Comment'),
-      feature: 'mcp:comments:get',
-      meta: toolMeta('comments', 'GET /reader/comment/{id}', ['comments', 'read']),
-    },
-    (args, creds, ctx) => getPostComment(ctx, creds, { commentId: args.comment_id }),
-  );
-  mcpTool(
-    server,
-    'list_post_comment_replies',
-    {
-      description: `List the direct replies to a Substack post comment.${TOKEN_NOTE}`,
-      inputSchema: z.object({ comment_id: z.number().int() }),
-      annotations: readAnnotations('List Post Comment Replies'),
-      feature: 'mcp:comments:replies:list',
-      meta: toolMeta('comments', 'GET /reader/comment/{id}/replies', ['comments', 'read']),
-    },
-    (args, creds, ctx) => listPostCommentReplies(ctx, creds, { commentId: args.comment_id }),
-  );
-  mcpTool(
-    server,
     'create_post_comment',
     {
       description: `Create a top-level comment on a Substack post.${TOKEN_NOTE}`,
@@ -79,12 +55,25 @@ export function registerCommentsTools(server: McpServer, _ctx: GatewayContext): 
   );
   mcpTool(
     server,
+    'get_post_comment',
+    {
+      description: `Fetch a single Substack post comment by its numeric ID.${TOKEN_NOTE}`,
+      inputSchema: z.object({ comment_id: z.number().int() }),
+      annotations: readAnnotations('Get Post Comment'),
+      feature: 'mcp:comments:get',
+      meta: toolMeta('comments', 'GET /reader/comment/{id}', ['comments', 'read']),
+    },
+    (args, creds, ctx) => getPostComment(ctx, creds, { commentId: args.comment_id }),
+  );
+  mcpTool(
+    server,
     'delete_post_comment',
     {
       description: `Delete a Substack post comment by its numeric ID.${TOKEN_NOTE}`,
       inputSchema: z.object({ comment_id: z.number().int() }),
       annotations: writeAnnotations('Delete Post Comment', { destructive: true, idempotent: true }),
       feature: 'mcp:comments:delete',
+      textResult: true,
       meta: toolMeta('comments', 'DELETE /comment/{id}', ['comments', 'write', 'delete']),
     },
     async (args, creds, ctx) => {
@@ -94,12 +83,25 @@ export function registerCommentsTools(server: McpServer, _ctx: GatewayContext): 
   );
   mcpTool(
     server,
+    'list_post_comment_replies',
+    {
+      description: `List the direct replies to a Substack post comment.${TOKEN_NOTE}`,
+      inputSchema: z.object({ comment_id: z.number().int() }),
+      annotations: readAnnotations('List Post Comment Replies'),
+      feature: 'mcp:comments:replies:list',
+      meta: toolMeta('comments', 'GET /reader/comment/{id}/replies', ['comments', 'read']),
+    },
+    (args, creds, ctx) => listPostCommentReplies(ctx, creds, { commentId: args.comment_id }),
+  );
+  mcpTool(
+    server,
     'like_post_comment',
     {
       description: `Add a like reaction to a Substack post comment.${TOKEN_NOTE}`,
       inputSchema: z.object({ comment_id: z.number().int() }),
       annotations: writeAnnotations('Like Post Comment', { idempotent: true }),
       feature: 'mcp:comments:like',
+      textResult: true,
       meta: toolMeta('comments', 'POST /comment/{id}/reaction', ['comments', 'write']),
     },
     async (args, creds, ctx) => {
@@ -116,6 +118,7 @@ export function registerCommentsTools(server: McpServer, _ctx: GatewayContext): 
       // Upstream marks this one destructive (the other unlike tools are not); kept verbatim.
       annotations: writeAnnotations('Unlike Post Comment', { destructive: true, idempotent: true }),
       feature: 'mcp:comments:unlike',
+      textResult: true,
       meta: toolMeta('comments', 'DELETE /comment/{id}/reaction', ['comments', 'write']),
     },
     async (args, creds, ctx) => {

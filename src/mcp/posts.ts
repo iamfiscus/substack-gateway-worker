@@ -27,6 +27,7 @@ export function registerPostsTools(server: McpServer, _ctx: GatewayContext): voi
       inputSchema: z.object({ post_id: z.number().int() }),
       annotations: writeAnnotations('Like Post', { idempotent: true }),
       feature: 'mcp:posts:like',
+      textResult: true,
       meta: toolMeta('posts', 'PUT /posts/{post_id}/like', ['posts', 'write']),
     },
     async (args, creds, ctx) => {
@@ -42,6 +43,7 @@ export function registerPostsTools(server: McpServer, _ctx: GatewayContext): voi
       inputSchema: z.object({ post_id: z.number().int() }),
       annotations: writeAnnotations('Unlike Post', { destructive: true, idempotent: true }),
       feature: 'mcp:posts:unlike',
+      textResult: true,
       meta: toolMeta('posts', 'DELETE /posts/{post_id}/like', ['posts', 'write', 'delete']),
     },
     async (args, creds, ctx) => {
@@ -57,6 +59,7 @@ export function registerPostsTools(server: McpServer, _ctx: GatewayContext): voi
       inputSchema: z.object({ post_id: z.number().int() }),
       annotations: writeAnnotations('Restack Post', { idempotent: false }),
       feature: 'mcp:posts:restack',
+      textResult: true,
       meta: toolMeta('posts', 'POST /posts/{post_id}/restack', ['posts', 'write']),
     },
     async (args, creds, ctx) => {

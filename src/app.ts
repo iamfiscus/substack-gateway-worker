@@ -80,6 +80,13 @@ async function checkGatewayKey(
 /** The `/api` sub-app: every REST router under `/v1`, with their OpenAPI routes. */
 export function createApi(extensions: readonly GatewayExtension[] = []): OpenAPIHono<AppEnv> {
   const api = new OpenAPIHono<AppEnv>();
+  // FastAPI's `Response(status_code=204)` still carries its default media type.
+  api.use('*', async (c, next) => {
+    await next();
+    if (c.res.status === 204 && !c.res.headers.has('content-type')) {
+      c.res.headers.set('content-type', 'application/json');
+    }
+  });
   api.route('/v1', healthRouter);
   api.route('/v1', meRouter);
   api.route('/v1', followingRouter);
@@ -170,7 +177,25 @@ export function createApp(opts: CreateAppOptions = {}): Hono<AppEnv> {
 
   const mcp = (c: { req: { raw: Request }; var: { gw: GatewayContext } }) =>
     handleMcpRequest(c.req.raw, c.var.gw, extensions);
-  app.on(['GET', 'POST', 'DELETE'], ['/mcp', '/mcp/'], (c) => mcp(c));
+  app.post('/mcp', (c) => mcp(c));
+  app.post('/mcp/', (c) => mcp(c));
+  // Stateless streamable HTTP, as upstream's FastMCP (`stateless_http=True`) answers them.
+  app.on('GET', ['/mcp', '/mcp/'], (c) =>
+    c.body('Method Not Allowed', 405, {
+      allow: 'POST, DELETE',
+      'content-type': 'text/plain; charset=utf-8',
+    }),
+  );
+  app.on('DELETE', ['/mcp', '/mcp/'], (c) =>
+    c.json(
+      {
+        jsonrpc: '2.0',
+        id: null,
+        error: { code: -32600, message: 'Method Not Allowed: Session termination not supported' },
+      },
+      405,
+    ),
+  );
 
   app.notFound((c) => c.json({ detail: 'Not Found' }, 404));
   app.onError((err, c) => {

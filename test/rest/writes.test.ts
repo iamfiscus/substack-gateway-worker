@@ -334,3 +334,23 @@ describe('write tools over /mcp', () => {
     expect(out.text).toContain('comment 42 has no associated post');
   });
 });
+
+describe('204 responses', () => {
+  // Parity (Task 20 harness): FastAPI's Response(status_code=204) keeps its
+  // default `application/json` media type.
+  it.each([
+    ['DELETE', '/api/v1/notes/42', `DELETE ${PUB}/comment/42`],
+    ['PUT', '/api/v1/notes/42/like', `POST ${GLOBAL}/comment/42/reaction`],
+    ['DELETE', '/api/v1/drafts/7/schedule', `DELETE ${PUB}/drafts/7/scheduled_release`],
+  ])('%s %s answers 204 with content-type application/json', async (method, path, route) => {
+    const app = createApp({ fetcher: createFakeSubstack({ [route]: {} }) });
+    const res = await app.request(
+      path,
+      { method, headers: { 'x-gateway-token': TOKEN } },
+      TEST_ENV,
+    );
+    expect(res.status).toBe(204);
+    expect(res.headers.get('content-type')).toBe('application/json');
+    expect(await res.text()).toBe('');
+  });
+});
