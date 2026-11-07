@@ -10,7 +10,8 @@ Inputs:
   ``scripts/golden/corpus-docs/*.json`` (ProseMirror docs; inputs harvested from
   test bodies by ``harvest.py``);
 - the three draft fixtures in ``packages/gateway_drafts/tests/fixtures``;
-- every string (Markdown) and doc-shaped (dict / text-node list) value in the
+- every string (Markdown) and doc-shaped (a ``type: doc`` dict, a single node
+  dict with a string ``type``, or a text-node list) value in the
   ``pytest.mark.parametrize`` lists of ``test_dialect_*.py`` and
   ``test_draft_markdown_*.py``.
 
@@ -41,6 +42,7 @@ import json
 import logging
 import re
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 from typing import Any
@@ -56,6 +58,7 @@ OUT = ROOT / "test" / "fixtures" / "golden"
 DRAFT_TESTS = UPSTREAM / "packages" / "gateway_drafts" / "tests"
 FIXTURES = DRAFT_TESTS / "fixtures"
 LATEX_ID = "GOLDENID00"
+UPSTREAM_COMMIT = "bc2e875"
 NOTE_MAX_CHARS = 20_000
 
 README = """\
@@ -132,9 +135,9 @@ def _as_doc(value: Any) -> dict[str, Any] | None:
     """A doc for a doc-shaped parametrize value, else None."""
     if isinstance(value, dict):
         kind = value.get("type")
-        if kind == "doc" or "type" not in value:
+        if kind == "doc":
             return value
-        if isinstance(kind, str):
+        if isinstance(kind, str):  # a single node: wrap it
             return {"type": "doc", "content": [value]}
         return None
     if (
@@ -173,7 +176,22 @@ def parametrize_inputs() -> tuple[list[tuple[str, str]], list[tuple[str, Any]]]:
 # --- running the converters -----------------------------------------------------
 
 
+def check_upstream() -> None:
+    """Fail loudly unless run from the pinned upstream checkout."""
+    if not DRAFT_TESTS.is_dir():
+        raise SystemExit(f"upstream draft tests not found at {DRAFT_TESTS}; run from upstream/")
+    head = subprocess.run(
+        ["git", "-C", str(UPSTREAM), "rev-parse", "--short", "HEAD"],
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.strip()
+    if head != UPSTREAM_COMMIT:
+        raise SystemExit(f"upstream is at {head!r}, expected {UPSTREAM_COMMIT!r}")
+
+
 def main() -> int:
+    check_upstream()
     logging.disable(logging.CRITICAL)  # the serializer warns on fallbacks
 
     from gateway_core.converters.markdown import markdown_to_note_payload

@@ -3,3 +3,4 @@ upstream/
 node_modules/
 .wrangler/
 dist/
+__pycache__/
