@@ -1,11 +1,18 @@
-// Read tools of gateway_notes_mcp (upstream bc2e875).
-// create_note, delete_note, like_note, unlike_note and reply_to_note arrive in Task 9/10.
+// Tools of gateway_notes_mcp (upstream bc2e875).
 
 import type { McpServer } from '@modelcontextprotocol/server';
 import { z } from 'zod';
 import type { GatewayContext } from '../context';
-import { getNote, listNoteReplies } from '../services/notes';
-import { mcpTool, readAnnotations, TOKEN_NOTE, toolMeta } from './server';
+import {
+  createNote,
+  deleteNote,
+  getNote,
+  likeNote,
+  listNoteReplies,
+  replyToNote,
+  unlikeNote,
+} from '../services/notes';
+import { mcpTool, readAnnotations, TOKEN_NOTE, toolMeta, writeAnnotations } from './server';
 
 export function registerNotesTools(server: McpServer, _ctx: GatewayContext): void {
   mcpTool(
@@ -31,5 +38,75 @@ export function registerNotesTools(server: McpServer, _ctx: GatewayContext): voi
       meta: toolMeta('notes', 'GET /reader/comment/{note_id}/replies', ['notes', 'read']),
     },
     (args, creds, ctx) => listNoteReplies(ctx, creds, { noteId: args.note_id }),
+  );
+  mcpTool(
+    server,
+    'create_note',
+    {
+      description: `Publish a new note to Substack from Markdown content, with an optional link attachment.${TOKEN_NOTE}`,
+      inputSchema: z.object({ content: z.string(), attachment: z.string().nullish() }),
+      annotations: writeAnnotations('Create Note', { idempotent: false }),
+      feature: 'mcp:notes:create',
+      meta: toolMeta('notes', 'POST /comment/feed/', ['notes', 'write']),
+    },
+    (args, creds, ctx) =>
+      createNote(ctx, creds, { content: args.content, attachment: args.attachment }),
+  );
+  mcpTool(
+    server,
+    'delete_note',
+    {
+      description: `Permanently delete a Substack note by its numeric ID.${TOKEN_NOTE}`,
+      inputSchema: z.object({ note_id: z.number().int() }),
+      annotations: writeAnnotations('Delete Note', { destructive: true, idempotent: true }),
+      feature: 'mcp:notes:delete',
+      meta: toolMeta('notes', 'DELETE /comment/{note_id}', ['notes', 'write', 'delete']),
+    },
+    async (args, creds, ctx) => {
+      await deleteNote(ctx, creds, { noteId: args.note_id });
+      return `Note ${args.note_id} deleted successfully.`;
+    },
+  );
+  mcpTool(
+    server,
+    'like_note',
+    {
+      description: `Add a like to a Substack note by its numeric ID.${TOKEN_NOTE}`,
+      inputSchema: z.object({ note_id: z.number().int() }),
+      annotations: writeAnnotations('Like Note', { idempotent: true }),
+      feature: 'mcp:notes:like',
+      meta: toolMeta('notes', 'POST /comment/{note_id}/reaction', ['notes', 'write']),
+    },
+    async (args, creds, ctx) => {
+      await likeNote(ctx, creds, { noteId: args.note_id });
+      return `Note ${args.note_id} liked successfully.`;
+    },
+  );
+  mcpTool(
+    server,
+    'unlike_note',
+    {
+      description: `Remove a like from a Substack note by its numeric ID.${TOKEN_NOTE}`,
+      inputSchema: z.object({ note_id: z.number().int() }),
+      annotations: writeAnnotations('Unlike Note', { idempotent: true }),
+      feature: 'mcp:notes:unlike',
+      meta: toolMeta('notes', 'DELETE /comment/{note_id}/reaction', ['notes', 'write']),
+    },
+    async (args, creds, ctx) => {
+      await unlikeNote(ctx, creds, { noteId: args.note_id });
+      return `Note ${args.note_id} unliked successfully.`;
+    },
+  );
+  mcpTool(
+    server,
+    'reply_to_note',
+    {
+      description: `Reply to a Substack note or to any comment within its thread, from Markdown content.${TOKEN_NOTE}`,
+      inputSchema: z.object({ note_id: z.number().int(), body: z.string() }),
+      annotations: writeAnnotations('Reply To Note', { idempotent: false }),
+      feature: 'mcp:notes:reply',
+      meta: toolMeta('notes', 'POST /comment/feed/', ['notes', 'write']),
+    },
+    (args, creds, ctx) => replyToNote(ctx, creds, { parentId: args.note_id, body: args.body }),
   );
 }

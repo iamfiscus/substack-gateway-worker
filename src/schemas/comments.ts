@@ -1,4 +1,4 @@
-// Port of read-side gateway_comments/schemas.py (upstream bc2e875).
+// Port of gateway_comments/schemas.py (upstream bc2e875).
 
 import { z } from '@hono/zod-openapi';
 import { parentIdOf, type SubstackNote, type SubstackPostComment } from './notes';
@@ -110,3 +110,7 @@ export function noteToPostComment(note: SubstackNote): SubstackPostComment | nul
     deleted: false,
   };
 }
+
+export const CreateCommentRequest = z
+  .object({ body: z.string().min(1) })
+  .openapi('CreateCommentRequest');

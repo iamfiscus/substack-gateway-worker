@@ -1,10 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { z } from 'zod';
 import { createApp } from '../../src/app';
 import type { GatewayEnv } from '../../src/config';
-import { type GatewayExtension, makeClients } from '../../src/context';
-import { mcpTool } from '../../src/mcp/server';
-import { restRoute } from '../../src/rest/credentials';
 import { encodeCredentials, TEST_ENV } from '../bdd/steps/common';
 import { MCP_HEADERS, readJsonRpc } from '../bdd/steps/mcp';
 import { createFakeSubstack, sample } from '../support/fakeSubstack';
@@ -28,23 +24,6 @@ const TOKEN = encodeCredentials({
 
 const KEY = { authorization: 'Bearer abc' };
 
-// Placeholder MCP tools on the real mcpTool path.
-// TODO(Task 9): replace with the real create_note tool (get_note is real since Task 7).
-const placeholderTools: GatewayExtension = {
-  name: 'test-placeholder-tools',
-  registerMcp: (server) => {
-    const echo = async (_a: unknown, creds: { substack_sid: string }) => ({
-      sid: creds.substack_sid,
-    });
-    const def = {
-      description: 'placeholder',
-      inputSchema: z.object({}),
-      annotations: {},
-    };
-    mcpTool(server, 'create_note', { ...def, feature: 'mcp:notes:create' }, echo);
-  },
-};
-
 function setup(env: GatewayEnv = OWNER_ENV) {
   const fake = createFakeSubstack({
     'GET substack.com/api/v1/handle/options': { potentialHandles: [{ handle: 'owner' }] },
@@ -52,17 +31,9 @@ function setup(env: GatewayEnv = OWNER_ENV) {
     'GET substack.com/api/v1/feed/following': {},
     'GET tok.substack.com/api/v1/reader/comment/1': sample('reader/comment/131648795'),
     'GET owner.substack.com/api/v1/reader/comment/1': sample('reader/comment/131648795'),
-    'POST tok.substack.com/api/v1/notes-stub': { ok: true },
-    'POST owner.substack.com/api/v1/notes-stub': { ok: true },
+    'POST substack.com/api/v1/comment/feed/': sample('comment/response'),
   });
-  const app = createApp({ fetcher: fake, extensions: [placeholderTools] });
-  // TODO(Task 9): drop this stub once the real `POST /api/v1/notes` router is mounted.
-  app.post(
-    '/api/v1/notes',
-    restRoute('api:notes:create', async (c, { creds, ctx }) =>
-      c.json(await makeClients(ctx, creds).publication.post('notes-stub'), 201),
-    ),
-  );
+  const app = createApp({ fetcher: fake });
   const request = async (path: string, init: RequestInit = {}): Promise<Response> =>
     app.request(path, init, env);
   // One entry per distinct cookie, in order: `/me` makes two Substack calls with one cookie.
@@ -166,7 +137,11 @@ describe('owner mode: resolved credentials', () => {
 
   it('gates features outside the owner allow-list', async () => {
     const { request, fake } = setup();
-    const res = await request('/api/v1/notes', { method: 'POST', headers: KEY });
+    const res = await request('/api/v1/notes', {
+      method: 'POST',
+      headers: { ...KEY, 'content-type': 'application/json' },
+      body: JSON.stringify({ content: 'hello' }),
+    });
     expect(res.status).toBe(403);
     expect(await res.json()).toEqual({
       detail: 'feature api:notes:create disabled for owner credentials',
@@ -195,7 +170,8 @@ describe('owner mode: explicit token wins (Review Focus 4)', () => {
     const { request, cookies } = setup();
     const res = await request('/api/v1/notes', {
       method: 'POST',
-      headers: { ...KEY, 'x-gateway-token': TOKEN },
+      headers: { ...KEY, 'x-gateway-token': TOKEN, 'content-type': 'application/json' },
+      body: JSON.stringify({ content: 'hello' }),
     });
     expect(res.status).toBe(201);
     expect(cookies()).toEqual([TOKEN_COOKIE]);
@@ -257,7 +233,7 @@ describe('MCP endpoint', () => {
     const { request } = setup();
     const { payload } = await mcpCall(request, '/mcp', 'tools/call', {
       name: 'create_note',
-      arguments: {},
+      arguments: { content: 'hello' },
     });
     const result = payload.result as ToolCallResult;
     expect(result.isError).toBe(true);
@@ -267,14 +243,15 @@ describe('MCP endpoint', () => {
   });
 
   it('lets an explicit token bypass the gate', async () => {
-    const { request } = setup();
+    const { request, cookies } = setup();
     const { payload } = await mcpCall(request, '/mcp', 'tools/call', {
       name: 'create_note',
-      arguments: { token: TOKEN },
+      arguments: { content: 'hello', token: TOKEN },
     });
     const result = payload.result as ToolCallResult;
     expect(result.isError).toBeFalsy();
-    expect(result.structuredContent).toEqual({ sid: 'tok-sid' });
+    expect(result.structuredContent).toEqual({ id: 131648796 });
+    expect(cookies()).toEqual([TOKEN_COOKIE]);
   });
 });
 

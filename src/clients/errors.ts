@@ -21,3 +21,14 @@ export class SubstackAPIError extends Error {
     this.status = status;
   }
 }
+
+/**
+ * A resource the gateway needed to resolve a request is missing (upstream
+ * CommentNotFoundError on the reply path). REST answers 404; MCP a tool error.
+ */
+export class NotFoundError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'NotFoundError';
+  }
+}

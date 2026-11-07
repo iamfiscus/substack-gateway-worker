@@ -6,7 +6,7 @@ import type { Context } from 'hono';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
 import { InvalidTokenError, MissingCredentialsError } from '../auth/credentials';
 import { FeatureDisabledError } from '../auth/features';
-import { SubstackAPIError, SubstackAuthError } from '../clients/errors';
+import { NotFoundError, SubstackAPIError, SubstackAuthError } from '../clients/errors';
 import type { AppEnv } from '../context';
 
 export type ErrorDetail = string | Record<string, unknown>[];
@@ -44,6 +44,7 @@ export function toHttpError(err: unknown): HttpErrorBody {
   if (err instanceof HttpError) return out(err.status, err.detail);
   if (err instanceof InvalidTokenError) return out(401, INVALID_CREDENTIALS);
   if (err instanceof MissingCredentialsError) return out(422, MISSING_TOKEN_DETAIL);
+  if (err instanceof NotFoundError) return out(404, err.message);
   if (err instanceof FeatureDisabledError) return out(403, err.message);
   if (err instanceof SubstackAuthError) return out(err.status, err.message);
   if (err instanceof SubstackAPIError) {

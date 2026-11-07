@@ -64,6 +64,20 @@ export function readAnnotations(title: string): ToolAnnotations {
   };
 }
 
+/** Annotations of an upstream write tool (never read-only, always open-world). */
+export function writeAnnotations(
+  title: string,
+  o: { destructive?: boolean; idempotent: boolean },
+): ToolAnnotations {
+  return {
+    title,
+    readOnlyHint: false,
+    destructiveHint: o.destructive ?? false,
+    idempotentHint: o.idempotent,
+    openWorldHint: true,
+  };
+}
+
 export type ToolResult = {
   content: { type: 'text'; text: string }[];
   structuredContent?: Record<string, unknown>;

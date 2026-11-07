@@ -1,6 +1,6 @@
-// Port of the read-side of gateway_notes/schemas.py and the note models of
-// gateway_core/models/substack.py (upstream bc2e875). Task 7 extends this file
-// with the write schemas; Task 7 added the single-note and reply reads.
+// Port of gateway_notes/schemas.py and the note models of
+// gateway_core/models/substack.py (upstream bc2e875): the read shapes plus the
+// note write requests and responses.
 
 import { z } from '@hono/zod-openapi';
 import type { Logger } from '../log';
@@ -193,4 +193,92 @@ export function noteRepliesResponse(replies: SubstackPostComment[]): NoteReplies
         }) as NoteRepliesResponse['items'][number],
     ),
   };
+}
+
+// ---- Writes ----
+
+/**
+ * Gateway-only cap on note/reply markdown, checked before conversion. Upstream
+ * has no limit; this is a deliberate deviation (a Worker should not convert an
+ * unbounded body).
+ */
+export const MAX_NOTE_CONTENT_CHARS = 50_000;
+
+/** Characters as Python counts them (code points); cheap unless the string is long. */
+function withinNoteLimit(text: string): boolean {
+  return text.length <= MAX_NOTE_CONTENT_CHARS || [...text].length <= MAX_NOTE_CONTENT_CHARS;
+}
+
+export class NoteContentTooLongError extends Error {
+  constructor(field: string) {
+    super(`${field} must be at most ${MAX_NOTE_CONTENT_CHARS} characters`);
+    this.name = 'NoteContentTooLongError';
+  }
+}
+
+/** Service-side guard, for callers (MCP) that bypass the REST request schema. */
+export function assertNoteContentLength(field: string, text: string): void {
+  if (!withinNoteLimit(text)) throw new NoteContentTooLongError(field);
+}
+
+/** zod's own `max` issue shape, so the 422 detail reads like the other length errors. */
+function checkNoteLimit(text: string, ctx: z.core.$RefinementCtx<string>): void {
+  if (withinNoteLimit(text)) return;
+  ctx.addIssue({
+    code: 'too_big',
+    origin: 'string',
+    maximum: MAX_NOTE_CONTENT_CHARS,
+    inclusive: true,
+    input: text,
+    message: `String should have at most ${MAX_NOTE_CONTENT_CHARS} characters`,
+  });
+}
+
+/** Created note: `{id, date?, status?}` (SubstackNoteCreated). */
+export const SubstackNoteCreated = z.object({
+  id: z.number().int(),
+  date: z.string().nullish(),
+  status: z.string().nullish(),
+});
+export type SubstackNoteCreated = z.infer<typeof SubstackNoteCreated>;
+
+/** POST /comment/attachment/ response. */
+export const SubstackAttachmentCreated = z.object({ id: z.string() });
+
+export const CreateNoteRequest = z
+  .object({
+    content: z.string().superRefine(checkNoteLimit),
+    attachment: z.string().nullish(),
+  })
+  .openapi('CreateNoteRequest');
+
+export const CreateNoteResponse = z.object({ id: z.number().int() }).openapi('CreateNoteResponse');
+export type CreateNoteResponse = z.infer<typeof CreateNoteResponse>;
+
+export const NoteReplyRequest = z
+  .object({
+    body: z.string().min(1).superRefine(checkNoteLimit),
+  })
+  .openapi('NoteReplyRequest');
+
+/** Served with exclude_none. */
+export const NoteReplyCreatedResponse = z
+  .object({
+    id: z.number().int(),
+    date: z.string().optional(),
+    status: z.string().optional(),
+  })
+  .openapi('NoteReplyCreatedResponse');
+export type NoteReplyCreatedResponse = z.infer<typeof NoteReplyCreatedResponse>;
+
+export function createNoteResponse(note: SubstackNoteCreated): CreateNoteResponse {
+  return { id: note.id };
+}
+
+export function noteReplyCreatedResponse(note: SubstackNoteCreated): NoteReplyCreatedResponse {
+  return excludeNone({
+    id: note.id,
+    date: note.date,
+    status: note.status,
+  }) as NoteReplyCreatedResponse;
 }

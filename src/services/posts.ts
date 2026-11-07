@@ -1,5 +1,5 @@
 // Port of PostsService in gateway_posts/service.py (upstream bc2e875).
-// The like/unlike/restack services arrive in Task 10.
+// Includes PostReactionsService and PostRestacksService.
 
 import type { BearerCredentials } from '../auth/credentials';
 import { type GatewayContext, makeClients } from '../context';
@@ -39,4 +39,38 @@ export async function getPost(
 ): Promise<FullPostResponse> {
   const body = await makeClients(ctx, creds).substack.get(`posts/by-id/${args.postId}`);
   return fullPostResponse(parseSubstack(SubstackPostResponse, body, 'post').post);
+}
+
+const LIKE_REACTION = '❤';
+const READER_SURFACE = 'reader';
+
+/** POST /post/{id}/reaction: like a post. */
+export async function likePost(
+  ctx: GatewayContext,
+  creds: BearerCredentials,
+  args: { postId: number },
+): Promise<void> {
+  await makeClients(ctx, creds).substack.post(`post/${args.postId}/reaction`, {
+    json: { reaction: LIKE_REACTION, surface: READER_SURFACE },
+  });
+}
+
+/** DELETE /post/{id}/reaction: remove the like. */
+export async function unlikePost(
+  ctx: GatewayContext,
+  creds: BearerCredentials,
+  args: { postId: number },
+): Promise<void> {
+  await makeClients(ctx, creds).substack.delete(`post/${args.postId}/reaction`, { json: {} });
+}
+
+/** POST /restack/feed: restack a post. */
+export async function restackPost(
+  ctx: GatewayContext,
+  creds: BearerCredentials,
+  args: { postId: number },
+): Promise<void> {
+  await makeClients(ctx, creds).substack.post('restack/feed', {
+    json: { postId: args.postId, commentId: null },
+  });
 }
