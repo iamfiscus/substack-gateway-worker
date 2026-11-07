@@ -1,1 +1,1 @@
-{"content": [{"attrs": {"textAlign": null}, "content": [{"marks": [{"type": "strong"}, {"type": "em"}], "text": "[`~\\", "type": "text"}], "type": "paragraph"}], "type": "doc"}
+{"type": "doc", "content": [{"type": "paragraph", "attrs": {"textAlign": null}, "content": [{"type": "text", "text": "[`~\\", "marks": [{"type": "strong"}, {"type": "em"}]}]}]}

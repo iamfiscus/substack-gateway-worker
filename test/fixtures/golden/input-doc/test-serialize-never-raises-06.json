@@ -1,1 +1,1 @@
-{"content": [{"attrs": {"level": "2"}, "content": [{"text": "x", "type": "text"}], "type": "heading"}]}
+{"content": [{"type": "heading", "attrs": {"level": "2"}, "content": [{"type": "text", "text": "x"}]}]}

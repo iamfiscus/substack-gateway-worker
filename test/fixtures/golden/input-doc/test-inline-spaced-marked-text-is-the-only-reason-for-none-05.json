@@ -1,1 +1,1 @@
-{"content": [{"attrs": {"textAlign": null}, "content": [{"marks": [{"attrs": {"class": null, "href": "https://y/(z)", "rel": "noopener noreferrer nofollow", "target": "_blank"}, "type": "link"}, {"type": "em"}], "text": "#*🔁", "type": "text"}], "type": "paragraph"}], "type": "doc"}
+{"type": "doc", "content": [{"type": "paragraph", "attrs": {"textAlign": null}, "content": [{"type": "text", "text": "#*🔁", "marks": [{"type": "link", "attrs": {"href": "https://y/(z)", "target": "_blank", "rel": "noopener noreferrer nofollow", "class": null}}, {"type": "em"}]}]}]}

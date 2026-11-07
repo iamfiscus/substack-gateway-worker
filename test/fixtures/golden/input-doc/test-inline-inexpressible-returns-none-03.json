@@ -1,1 +1,1 @@
-{"content": [{"attrs": {"textAlign": null}, "content": [{"attrs": {"number": 1}, "type": "footnoteAnchor"}], "type": "paragraph"}], "type": "doc"}
+{"type": "doc", "content": [{"type": "paragraph", "attrs": {"textAlign": null}, "content": [{"type": "footnoteAnchor", "attrs": {"number": 1}}]}]}

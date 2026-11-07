@@ -1,1 +1,1 @@
-{"content": [{"attrs": {"textAlign": "right"}, "content": [{"text": "right", "type": "text"}], "type": "paragraph"}, {"attrs": {"textAlign": null}, "content": [{"text": "plain", "type": "text"}], "type": "paragraph"}], "type": "doc"}
+{"type": "doc", "content": [{"type": "paragraph", "attrs": {"textAlign": "right"}, "content": [{"type": "text", "text": "right"}]}, {"type": "paragraph", "attrs": {"textAlign": null}, "content": [{"type": "text", "text": "plain"}]}]}

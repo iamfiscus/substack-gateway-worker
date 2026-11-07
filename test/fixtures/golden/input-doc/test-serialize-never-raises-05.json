@@ -1,1 +1,1 @@
-{"content": [{"attrs": {"level": 1000000000}, "content": [{"text": "x", "type": "text"}], "type": "heading"}]}
+{"content": [{"type": "heading", "attrs": {"level": 1000000000}, "content": [{"type": "text", "text": "x"}]}]}

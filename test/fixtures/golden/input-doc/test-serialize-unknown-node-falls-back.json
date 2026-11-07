@@ -1,1 +1,1 @@
-{"content": [{"attrs": {"id": "v"}, "type": "videoEmbed"}], "type": "doc"}
+{"type": "doc", "content": [{"type": "videoEmbed", "attrs": {"id": "v"}}]}

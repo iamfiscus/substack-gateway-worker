@@ -1,1 +1,1 @@
-{"content": [{"content": [{"attrs": {"textAlign": null}, "content": [{"text": "a", "type": "text"}], "type": "paragraph"}, {"attrs": {"textAlign": "center"}, "content": [{"text": "b", "type": "text"}], "type": "paragraph"}], "type": "blockquote"}], "type": "doc"}
+{"type": "doc", "content": [{"type": "blockquote", "content": [{"type": "paragraph", "attrs": {"textAlign": null}, "content": [{"type": "text", "text": "a"}]}, {"type": "paragraph", "attrs": {"textAlign": "center"}, "content": [{"type": "text", "text": "b"}]}]}]}

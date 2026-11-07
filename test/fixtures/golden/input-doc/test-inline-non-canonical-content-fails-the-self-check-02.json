@@ -1,1 +1,1 @@
-{"content": [{"attrs": {"textAlign": null}, "content": [{"marks": [{"type": "strong"}], "text": "a", "type": "text"}, {"marks": [{"type": "strong"}], "text": "b", "type": "text"}], "type": "paragraph"}], "type": "doc"}
+{"type": "doc", "content": [{"type": "paragraph", "attrs": {"textAlign": null}, "content": [{"type": "text", "text": "a", "marks": [{"type": "strong"}]}, {"type": "text", "text": "b", "marks": [{"type": "strong"}]}]}]}

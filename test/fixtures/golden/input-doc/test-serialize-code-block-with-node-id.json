@@ -1,1 +1,1 @@
-{"content": [{"attrs": {"language": "python", "nodeId": "abc-1"}, "content": [{"text": "print(1)\n\n  x  ", "type": "text"}], "type": "highlighted_code_block"}], "type": "doc"}
+{"type": "doc", "content": [{"type": "highlighted_code_block", "attrs": {"language": "python", "nodeId": "abc-1"}, "content": [{"type": "text", "text": "print(1)\n\n  x  "}]}]}

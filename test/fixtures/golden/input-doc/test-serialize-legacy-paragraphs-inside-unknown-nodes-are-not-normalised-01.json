@@ -1,1 +1,1 @@
-{"content": [{"attrs": {"textAlign": null}, "content": [{"text": "Before.", "type": "text"}], "type": "paragraph"}, {"content": [{"content": [{"text": "inside", "type": "text"}], "type": "paragraph"}], "type": "someFutureBlock"}], "type": "doc"}
+{"type": "doc", "content": [{"type": "paragraph", "attrs": {"textAlign": null}, "content": [{"type": "text", "text": "Before."}]}, {"type": "someFutureBlock", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "inside"}]}]}]}

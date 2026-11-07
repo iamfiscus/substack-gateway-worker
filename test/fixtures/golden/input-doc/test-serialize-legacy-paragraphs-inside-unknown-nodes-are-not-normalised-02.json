@@ -1,1 +1,1 @@
-{"content": [{"attrs": {"textAlign": null}, "content": [{"text": "Before.", "type": "text"}], "type": "paragraph"}, {"attrs": {"number": 1}, "content": [{"content": [{"text": "note", "type": "text"}], "type": "paragraph"}], "type": "footnote"}], "type": "doc"}
+{"type": "doc", "content": [{"type": "paragraph", "attrs": {"textAlign": null}, "content": [{"type": "text", "text": "Before."}]}, {"type": "footnote", "attrs": {"number": 1}, "content": [{"type": "paragraph", "content": [{"type": "text", "text": "note"}]}]}]}

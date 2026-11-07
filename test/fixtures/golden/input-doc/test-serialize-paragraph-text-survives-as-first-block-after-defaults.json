@@ -1,1 +1,1 @@
-{"content": [{"attrs": {"textAlign": "justify"}, "content": [{"text": "::defaults{align=left}", "type": "text"}], "type": "paragraph"}, {"attrs": {"textAlign": "justify"}, "content": [{"text": "b", "type": "text"}], "type": "paragraph"}], "type": "doc"}
+{"type": "doc", "content": [{"type": "paragraph", "attrs": {"textAlign": "justify"}, "content": [{"type": "text", "text": "::defaults{align=left}"}]}, {"type": "paragraph", "attrs": {"textAlign": "justify"}, "content": [{"type": "text", "text": "b"}]}]}

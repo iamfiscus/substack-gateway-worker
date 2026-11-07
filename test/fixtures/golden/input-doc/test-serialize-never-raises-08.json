@@ -1,1 +1,1 @@
-{"content": [{"attrs": {"textAlign": ["x"]}, "content": [{"text": "x", "type": "text"}], "type": "paragraph"}]}
+{"content": [{"type": "paragraph", "attrs": {"textAlign": ["x"]}, "content": [{"type": "text", "text": "x"}]}]}

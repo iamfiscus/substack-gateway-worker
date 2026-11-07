@@ -1,1 +1,1 @@
-{"content": [{"attrs": {"order": 1, "start": 1, "type": null}, "content": [{"content": [{"attrs": {"textAlign": null}, "content": [{"text": "b", "type": "text"}], "type": "paragraph"}], "type": "list_item"}], "type": "ordered_list"}], "type": "doc"}
+{"type": "doc", "content": [{"type": "ordered_list", "attrs": {"start": 1, "type": null, "order": 1}, "content": [{"type": "list_item", "content": [{"type": "paragraph", "attrs": {"textAlign": null}, "content": [{"type": "text", "text": "b"}]}]}]}]}

@@ -1,1 +1,1 @@
-{"content": [{"content": [{"attrs": {"textAlign": null}, "content": [{"text": "+ x", "type": "text"}], "type": "paragraph"}], "type": "blockquote"}], "type": "doc"}
+{"type": "doc", "content": [{"type": "blockquote", "content": [{"type": "paragraph", "attrs": {"textAlign": null}, "content": [{"type": "text", "text": "+ x"}]}]}]}

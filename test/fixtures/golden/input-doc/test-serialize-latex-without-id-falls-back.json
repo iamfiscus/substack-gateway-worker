@@ -1,1 +1,1 @@
-{"content": [{"attrs": {"persistentExpression": "x"}, "type": "latex_block"}], "type": "doc"}
+{"type": "doc", "content": [{"type": "latex_block", "attrs": {"persistentExpression": "x"}}]}

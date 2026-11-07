@@ -1,1 +1,1 @@
-{"content": [{"attrs": {"textAlign": null}, "content": [{"marks": [{"type": "underline"}], "text": "u", "type": "text"}], "type": "paragraph"}, {"attrs": {"textAlign": null}, "type": "paragraph"}], "type": "doc"}
+{"type": "doc", "content": [{"type": "paragraph", "attrs": {"textAlign": null}, "content": [{"type": "text", "text": "u", "marks": [{"type": "underline"}]}]}, {"type": "paragraph", "attrs": {"textAlign": null}}]}

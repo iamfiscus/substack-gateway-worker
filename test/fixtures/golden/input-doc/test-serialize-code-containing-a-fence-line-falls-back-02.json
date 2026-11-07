@@ -1,1 +1,1 @@
-{"content": [{"attrs": {"language": "python", "nodeId": null}, "content": [{"text": "a\n```python\nb", "type": "text"}], "type": "highlighted_code_block"}], "type": "doc"}
+{"type": "doc", "content": [{"type": "highlighted_code_block", "attrs": {"language": "python", "nodeId": null}, "content": [{"type": "text", "text": "a\n```python\nb"}]}]}

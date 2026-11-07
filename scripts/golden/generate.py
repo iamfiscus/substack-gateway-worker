@@ -20,7 +20,8 @@ is ``json.dumps(obj, sort_keys=True, ensure_ascii=False)``, the ``_canon`` of
 upstream ``test_draft_round_trip.py``, with no trailing newline:
 
 - ``input/<name>.md``: the Markdown input, byte for byte;
-- ``input-doc/<name>.json``: a doc input (canonical JSON);
+- ``input-doc/<name>.json``: a doc input, ``json.dumps(doc, ensure_ascii=False)``
+  (key order kept: the serializer's output depends on it);
 - ``note/<name>.json``: ``markdown_to_note_payload(md)``, no attachments, for
   inputs of at most ``NOTE_MAX_CHARS`` characters (the note converter's link
   regex is quadratic on runs of ``[``: upstream takes ~17 s on the 100 000-char
@@ -268,7 +269,7 @@ def main() -> int:
 
     for name in sorted(doc_inputs):
         doc = doc_inputs[name]
-        write(OUT / "input-doc" / f"{name}.json", canon(doc))
+        write(OUT / "input-doc" / f"{name}.json", json.dumps(doc, ensure_ascii=False))
         emit("draft-md", f"doc-{name}", draft_body_to_markdown(json.dumps(doc)), "md")
 
     for path in sorted(FIXTURES.glob("*.json")):
