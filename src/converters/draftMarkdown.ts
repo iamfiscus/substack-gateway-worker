@@ -30,11 +30,12 @@ export function markdownToDraftBody(markdown: string): string {
 
 /**
  * A stored draft body (JSON text, read like `json.loads`) as dialect Markdown.
- * Throws JSONDecodeError when `body` is not JSON.
+ * Throws JSONDecodeError when `body` is not JSON. Serializer warnings go to
+ * `warn` when given (see `serializeDoc`).
  */
-export function draftBodyToMarkdown(body: string): string {
+export function draftBodyToMarkdown(body: string, warn?: (message: string) => void): string {
   // The trailing newline keeps the output multi-line, so feeding it back to
   // `markdownToDraftDoc` never triggers the literal `\n` expansion.
-  const markdown = serializeDoc(pyJsonLoads(body));
+  const markdown = serializeDoc(pyJsonLoads(body), warn);
   return markdown ? `${markdown}\n` : '';
 }

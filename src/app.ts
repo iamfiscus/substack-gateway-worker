@@ -13,6 +13,7 @@ import { type AppEnv, type GatewayContext, type GatewayExtension, NullValueCache
 import { createLogger } from './log';
 import { handleMcpRequest } from './mcp/server';
 import { commentsRouter } from './rest/comments';
+import { draftsRouter } from './rest/drafts';
 import { errorResponse, GATEWAY_MISCONFIGURED } from './rest/errors';
 import { followingRouter } from './rest/following';
 import { healthRouter } from './rest/health';
@@ -56,6 +57,21 @@ async function checkGatewayKey(req: Request, raw: string | undefined): Promise<K
   if (keys.length === 0) return { kind: 'misconfigured' };
   const auth = await authenticateGatewayKey(req, keys);
   return auth ? { kind: 'ok', auth } : { kind: 'denied' };
+}
+
+/** The `/api` sub-app: every REST router under `/v1`, with their OpenAPI routes. */
+export function createApi(): OpenAPIHono<AppEnv> {
+  const api = new OpenAPIHono<AppEnv>();
+  api.route('/v1', healthRouter);
+  api.route('/v1', meRouter);
+  api.route('/v1', followingRouter);
+  api.route('/v1', notesRouter);
+  api.route('/v1', commentsRouter);
+  api.route('/v1', postsRouter);
+  api.route('/v1', profilesRouter);
+  api.route('/v1', statsRouter);
+  api.route('/v1', draftsRouter);
+  return api;
 }
 
 export function createApp(opts: CreateAppOptions = {}): Hono<AppEnv> {
@@ -115,16 +131,7 @@ export function createApp(opts: CreateAppOptions = {}): Hono<AppEnv> {
 
   app.get('/', rootHandler(extensions));
 
-  const api = new OpenAPIHono<AppEnv>();
-  api.route('/v1', healthRouter);
-  api.route('/v1', meRouter);
-  api.route('/v1', followingRouter);
-  api.route('/v1', notesRouter);
-  api.route('/v1', commentsRouter);
-  api.route('/v1', postsRouter);
-  api.route('/v1', profilesRouter);
-  api.route('/v1', statsRouter);
-  app.route('/api', api);
+  app.route('/api', createApi());
 
   const mcp = (c: { req: { raw: Request }; var: { gw: GatewayContext } }) =>
     handleMcpRequest(c.req.raw, c.var.gw, extensions);

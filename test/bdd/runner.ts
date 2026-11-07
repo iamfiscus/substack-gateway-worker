@@ -2,7 +2,7 @@
 // steps of a .feature file, via @amiceli/vitest-cucumber.
 
 import { readFile } from 'node:fs/promises';
-import { describeFeature, loadFeature } from '@amiceli/vitest-cucumber';
+import { describeFeature, loadFeatureFromText } from '@amiceli/vitest-cucumber';
 
 export type StepExtra = { docString: string | null };
 export type StepFn<W> = (world: W, args: string[], extra: StepExtra) => unknown;
@@ -108,21 +108,52 @@ function rawDocStrings(source: string): DocString[] {
   return docs;
 }
 
+const STEP_LINE = /^(\s*(?:Given|When|Then|And|But)\s+)(.*?)\s*$/;
+const SCENARIO_LINE = /^\s*Scenario( Outline)?:/;
+const REPEAT_MARK = '\u200b';
+
+/**
+ * vitest-cucumber refuses a scenario that repeats a step (upstream
+ * drafts.feature checks `the response status code is 200` twice), so each
+ * repeat gets a run of zero-width spaces appended, stripped again before the
+ * step is matched.
+ */
+function markRepeatedSteps(source: string): string {
+  let seen = new Map<string, number>();
+  return source
+    .split(/\r?\n/)
+    .map((line) => {
+      if (SCENARIO_LINE.test(line)) seen = new Map();
+      const m = STEP_LINE.exec(line);
+      if (!m) return line;
+      const details = m[2] as string;
+      const count = seen.get(details) ?? 0;
+      seen.set(details, count + 1);
+      return count === 0 ? line : `${m[1]}${details}${REPEAT_MARK.repeat(count)}`;
+    })
+    .join('\n');
+}
+
+function unmark(details: string): string {
+  return details.replace(/\u200b+$/, '');
+}
+
 export async function runFeature<W>(
   path: string,
   steps: StepRegistry<W>,
   opts: RunFeatureOptions<W>,
 ): Promise<void> {
-  const feature = await loadFeature(path);
+  const source = await readFile(path, 'utf8');
+  const feature = loadFeatureFromText(markRepeatedSteps(source));
   // Background and Rule blocks are not supported here, so every doc string
   // belongs to a scenario step; pair them up in file order by step line.
-  const docs = rawDocStrings(await readFile(path, 'utf8'));
+  const docs = rawDocStrings(source);
   const docOf = new Map<object, string>();
   let next = 0;
   for (const scenario of feature.scenarii) {
     for (const s of scenario.steps) {
       const doc = docs[next];
-      if (doc && doc.stepLine === `${s.type} ${s.details}`) {
+      if (doc && doc.stepLine === `${s.type} ${unmark(s.details)}`) {
         docOf.set(s, doc.text);
         next++;
       }
@@ -140,8 +171,8 @@ export async function runFeature<W>(
         const world = skipped ? (undefined as W) : opts.world();
         for (const s of scenario.steps) {
           const keyword = s.type as Keyword;
-          const text = s.details;
-          (s as { details: string }).details = regexInert(text);
+          const text = unmark(s.details);
+          (s as { details: string }).details = regexInert(s.details);
           if (skipped) {
             fns[keyword](s.details, () => {});
             continue;

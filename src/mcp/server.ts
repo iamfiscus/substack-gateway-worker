@@ -9,6 +9,7 @@ import { anonymousCredentials, type GatewayContext, type GatewayExtension } from
 import { APPLICATION_NAME, OSS_VERSION } from '../features';
 import { registerCommentsTools } from './comments';
 import { resolveMcpCredentials } from './credentials';
+import { registerDraftsTools } from './drafts';
 import { registerFollowingTools } from './following';
 import { registerMeTools } from './me';
 import { registerNotesTools } from './notes';
@@ -174,6 +175,7 @@ const DOMAIN_TOOLS: ((server: McpServer, ctx: GatewayContext) => void)[] = [
   registerNotesTools,
   registerCommentsTools,
   registerStatsTools,
+  registerDraftsTools,
 ];
 
 export function createMcpServer(

@@ -78,8 +78,12 @@ export function setSerializerWarn(fn: ((message: string) => void) | null): void 
   warn = fn ?? warnToConsole;
 }
 
-/** Write a ProseMirror doc as draft dialect Markdown; never throws. */
-export function serializeDoc(doc: unknown): string {
+/**
+ * Write a ProseMirror doc as draft dialect Markdown; never throws. Warnings go
+ * to `warnFn` when given (request code passes its context logger, so nothing
+ * depends on the module-level sink), else to the `setSerializerWarn` sink.
+ */
+export function serializeDoc(doc: unknown, warnFn: (message: string) => void = warn): string {
   const stored = isDict(doc) ? pyGet(doc, 'content') : null;
   if (!Array.isArray(stored) || stored.length === 0) return '';
   let content: unknown[] = stored;
@@ -88,13 +92,13 @@ export function serializeDoc(doc: unknown): string {
     const markdown = new Serializer(content).run();
     if (identical(parseBlocks(markdown), content)) return markdown;
     // Never log the content: drafts are private.
-    warn(
+    warnFn(
       `draft serializer: whole-document check failed for ${content.length} blocks; ` +
         'writing every block as a substack-node fence',
     );
   } catch (err) {
     // any failure degrades to verbatim fences
-    warn(
+    warnFn(
       `draft serializer failed (${errorName(err)}); writing every block as a ` +
         'substack-node fence',
     );

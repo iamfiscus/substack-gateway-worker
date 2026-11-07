@@ -20,6 +20,7 @@ import {
   markdownToDraftBody,
   markdownToDraftDoc,
 } from '../../src/converters/draftMarkdown';
+import { draftResponse, providedUpdates, UpdateDraftRequest } from '../../src/schemas/drafts';
 import { canonicalJson } from '../support/canon';
 
 const FIXTURES = join(import.meta.dirname, '..', 'fixtures', 'drafts');
@@ -90,14 +91,27 @@ describe('test_draft_round_trip', () => {
 });
 
 describe('test_draft_compat', () => {
-  // TODO(Task 16): testUpdateRequestReportsOnlyProvidedFields needs the drafts
-  // request schema, and the DraftResponse half of the test below needs the
-  // drafts response schema.
-  it.todo('updateRequestReportsOnlyProvidedFields');
+  it('updateRequestReportsOnlyProvidedFields', () => {
+    expect(providedUpdates(UpdateDraftRequest.parse({ body: '**bold**' }))).toEqual({
+      body: '**bold**',
+    });
+    expect(providedUpdates(UpdateDraftRequest.parse({ title: 'T', body: 'x' }))).toEqual({
+      title: 'T',
+      body: 'x',
+    });
+  });
 
   it('sharedDraftResponseRoundTripsThroughMarkdownConverter', () => {
-    const body = markdownToDraftBody('> quoted');
-    expect(draftBodyToMarkdown(body)).toBe('> quoted\n');
+    const draft = {
+      draft_title: 'Title',
+      draft_subtitle: 'Subtitle',
+      draft_body: markdownToDraftBody('> quoted'),
+    };
+    const response = draftResponse(draft, () => {});
+    expect(response.title).toBe('Title');
+    expect(response.subtitle).toBe('Subtitle');
+    expect(response.body).toBe(draftBodyToMarkdown(draft.draft_body));
+    expect(response.body).toBe('> quoted\n');
   });
 });
 
