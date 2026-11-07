@@ -21,6 +21,7 @@ import { notesRouter } from './rest/notes';
 import { postsRouter } from './rest/posts';
 import { profilesRouter } from './rest/profiles';
 import { rootHandler } from './rest/root';
+import { statsRouter } from './rest/stats';
 
 export type CreateAppOptions = { fetcher?: Fetcher; extensions?: GatewayExtension[] };
 
@@ -122,6 +123,7 @@ export function createApp(opts: CreateAppOptions = {}): Hono<AppEnv> {
   api.route('/v1', commentsRouter);
   api.route('/v1', postsRouter);
   api.route('/v1', profilesRouter);
+  api.route('/v1', statsRouter);
   app.route('/api', api);
 
   const mcp = (c: { req: { raw: Request }; var: { gw: GatewayContext } }) =>

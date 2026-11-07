@@ -14,6 +14,7 @@ import { registerMeTools } from './me';
 import { registerNotesTools } from './notes';
 import { registerPostsTools } from './posts';
 import { registerProfilesTools } from './profiles';
+import { registerStatsTools } from './stats';
 
 export type ToolAnnotations = {
   title?: string;
@@ -158,6 +159,7 @@ const DOMAIN_TOOLS: ((server: McpServer, ctx: GatewayContext) => void)[] = [
   registerMeTools,
   registerNotesTools,
   registerCommentsTools,
+  registerStatsTools,
 ];
 
 export function createMcpServer(
