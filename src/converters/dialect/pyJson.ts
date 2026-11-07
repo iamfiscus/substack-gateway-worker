@@ -8,7 +8,8 @@
 //   non-ASCII raw (ensure_ascii=False, lone surrogates included), Python float
 //   spellings, and NaN / Infinity. An integral number is written as an int.
 
-import { INT_MAX_STR_DIGITS, intDigitLimitMessage, PyValueError } from './pyStr';
+import { PyValueError } from './errors';
+import { INT_MAX_STR_DIGITS, intDigitLimitMessage, setOwn } from './pyStr';
 
 export class JSONDecodeError extends PyValueError {
   override name = 'JSONDecodeError';
@@ -31,16 +32,6 @@ export class JSONDecodeError extends PyValueError {
     this.lineno = lineno;
     this.colno = colno;
   }
-}
-
-/** Defines `key` as an own property, so that `__proto__` is data, not the prototype. */
-export function setOwn(target: Record<string, unknown>, key: string, value: unknown): void {
-  Object.defineProperty(target, key, {
-    value,
-    writable: true,
-    enumerable: true,
-    configurable: true,
-  });
 }
 
 const WHITESPACE = new Set([' ', '\t', '\n', '\r']);

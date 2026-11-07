@@ -1,5 +1,7 @@
 // Python str semantics the dialect relies on where JS differs.
 
+import { PyValueError } from './errors';
+
 /**
  * Python's `\s` for str patterns, which is also exactly `str.isspace()`, as a
  * regex character-class body (it has U+001C..U+001F and U+0085, and not U+FEFF,
@@ -24,11 +26,6 @@ export function intDigitLimitMessage(digits: number): string {
     `Exceeds the limit (${INT_MAX_STR_DIGITS} digits) for integer string conversion: ` +
     `value has ${digits} digits; use sys.set_int_max_str_digits() to increase the limit`
   );
-}
-
-/** Raised where Python raises ValueError (and nothing more specific applies). */
-export class PyValueError extends Error {
-  override name = 'ValueError';
 }
 
 const DIGIT = /^\p{Nd}$/u;
@@ -59,4 +56,14 @@ export function pyIntFromDigits(raw: string): number {
   if (ascii.length > INT_MAX_STR_DIGITS) throw new PyValueError(intDigitLimitMessage(ascii.length));
   const value = Number(ascii);
   return negative && value !== 0 ? -value : value;
+}
+
+/** Defines `key` as an own property, so that `__proto__` is data, not the prototype. */
+export function setOwn(target: Record<string, unknown>, key: string, value: unknown): void {
+  Object.defineProperty(target, key, {
+    value,
+    writable: true,
+    enumerable: true,
+    configurable: true,
+  });
 }

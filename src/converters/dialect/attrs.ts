@@ -14,10 +14,10 @@
 // 2^53 lose precision, `1.0` and `1` are the same number (both are an int here),
 // and integer-like keys ("1") come first in JS object order.
 
-import { DraftMarkdownError } from './errors';
-import { JSONDecodeError, pyJsonDumps, pyJsonLoads, setOwn } from './pyJson';
+import { DraftMarkdownError, PyValueError } from './errors';
+import { JSONDecodeError, pyJsonDumps, pyJsonLoads } from './pyJson';
 import { pyRepr } from './pyRepr';
-import { isSpace, PY_SPACE, PyValueError, pyIntFromDigits } from './pyStr';
+import { isSpace, PY_SPACE, pyIntFromDigits, setOwn } from './pyStr';
 
 export type Attrs = Record<string, unknown>;
 
