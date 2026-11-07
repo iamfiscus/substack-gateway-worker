@@ -191,7 +191,7 @@ describe('SubstackClient / PublicationClient', () => {
   it('resolves own slug and user id; checks connectivity', async () => {
     const f = createFakeSubstack({
       'GET substack.com/api/v1/handle/options': sample('handle/options'),
-      'GET substack.com/api/v1/user-settings': { userSettings: [{ userId: 42 }] },
+      'GET substack.com/api/v1/user-settings': { userSettings: [{ user_id: 42 }] },
       'GET substack.com/api/v1/feed/following': {},
     });
     const c = new SubstackClient({ ...opts(f), baseUrl: 'https://substack.com' });

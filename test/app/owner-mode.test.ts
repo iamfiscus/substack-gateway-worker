@@ -49,18 +49,12 @@ const placeholderTools: GatewayExtension = {
 function setup(env: GatewayEnv = OWNER_ENV) {
   const fake = createFakeSubstack({
     'GET substack.com/api/v1/handle/options': { potentialHandles: [{ handle: 'owner' }] },
+    'GET substack.com/api/v1/user/owner/public_profile': { id: 1, name: 'Owner', handle: 'owner' },
     'GET substack.com/api/v1/feed/following': {},
     'POST tok.substack.com/api/v1/notes-stub': { ok: true },
     'POST owner.substack.com/api/v1/notes-stub': { ok: true },
   });
   const app = createApp({ fetcher: fake, extensions: [placeholderTools] });
-  // TODO(Task 10): drop this stub once the real `GET /api/v1/me` router is mounted.
-  app.get(
-    '/api/v1/me',
-    restRoute('api:me:get', async (c, { creds, ctx }) =>
-      c.json({ slug: await makeClients(ctx, creds).substack.getOwnSlug() }),
-    ),
-  );
   // TODO(Task 9): drop this stub once the real `POST /api/v1/notes` router is mounted.
   app.post(
     '/api/v1/notes',
@@ -70,7 +64,8 @@ function setup(env: GatewayEnv = OWNER_ENV) {
   );
   const request = async (path: string, init: RequestInit = {}): Promise<Response> =>
     app.request(path, init, env);
-  const cookies = () => fake.calls.map((r) => r.headers.get('cookie'));
+  // One entry per distinct cookie, in order: `/me` makes two Substack calls with one cookie.
+  const cookies = () => [...new Set(fake.calls.map((r) => r.headers.get('cookie')))];
   return { app, fake, request, cookies };
 }
 
@@ -148,7 +143,7 @@ describe('owner mode: resolved credentials', () => {
     const { request, cookies } = setup();
     const res = await request('/api/v1/me', { headers: KEY });
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ slug: 'owner' });
+    expect(await res.json()).toMatchObject({ handle: 'owner' });
     expect(cookies()).toEqual([OWNER_COOKIE]);
   });
 
@@ -234,8 +229,12 @@ describe('MCP endpoint', () => {
     const { res, payload } = await mcpCall(request, path, 'tools/list');
     expect(res.status).toBe(200);
     const tools = (payload.result as { tools: { name: string; inputSchema: unknown }[] }).tools;
-    expect(tools.map((t) => t.name).sort()).toEqual(['create_note', 'get_note']);
-    const schema = tools[0]?.inputSchema as { properties: Record<string, unknown> };
+    expect(tools.map((t) => t.name)).toEqual(
+      expect.arrayContaining(['create_note', 'get_note', 'get_me']),
+    );
+    const schema = tools.find((t) => t.name === 'get_note')?.inputSchema as {
+      properties: Record<string, unknown>;
+    };
     expect(schema.properties).toHaveProperty('token');
   });
 

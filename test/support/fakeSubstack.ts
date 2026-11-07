@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Fetcher } from '../../src/clients/base';
 
@@ -7,8 +8,9 @@ export type FakeRoute = unknown;
 
 /** Load a JSON sample from test/fixtures/samples/<path>. */
 export function sample(path: string): unknown {
-  const file = fileURLToPath(new URL(`../fixtures/samples/${path}`, import.meta.url).href);
-  return JSON.parse(readFileSync(file, 'utf8'));
+  // Joined as a plain path: some sample names carry a "?" (feed/profile/<id>?types=note).
+  const root = join(dirname(fileURLToPath(import.meta.url)), '../fixtures/samples');
+  return JSON.parse(readFileSync(join(root, path), 'utf8'));
 }
 
 /**

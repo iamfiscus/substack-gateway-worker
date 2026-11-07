@@ -13,7 +13,11 @@ import { type AppEnv, type GatewayContext, type GatewayExtension, NullValueCache
 import { createLogger } from './log';
 import { handleMcpRequest } from './mcp/server';
 import { errorResponse, GATEWAY_MISCONFIGURED } from './rest/errors';
+import { followingRouter } from './rest/following';
 import { healthRouter } from './rest/health';
+import { meRouter } from './rest/me';
+import { postsRouter } from './rest/posts';
+import { profilesRouter } from './rest/profiles';
 import { rootHandler } from './rest/root';
 
 export type CreateAppOptions = { fetcher?: Fetcher; extensions?: GatewayExtension[] };
@@ -110,6 +114,10 @@ export function createApp(opts: CreateAppOptions = {}): Hono<AppEnv> {
 
   const api = new OpenAPIHono<AppEnv>();
   api.route('/v1', healthRouter);
+  api.route('/v1', meRouter);
+  api.route('/v1', followingRouter);
+  api.route('/v1', postsRouter);
+  api.route('/v1', profilesRouter);
   app.route('/api', api);
 
   const mcp = (c: { req: { raw: Request }; var: { gw: GatewayContext } }) =>

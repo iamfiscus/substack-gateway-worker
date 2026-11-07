@@ -103,6 +103,24 @@ export const mcpSteps: StepRegistry<World> = [
     callTool(w, 'get_note', { note_id: 1 }, { withToken: false }),
   ),
 
+  // me / posts / profiles (upstream mcp_tools.py)
+  step('I call the MCP tool get_me', (w) => callTool(w, 'get_me', {})),
+  step('I call the MCP tool get_my_notes', (w) => callTool(w, 'get_my_notes', {})),
+  step('I call the MCP tool get_my_posts', (w) => callTool(w, 'get_my_posts', {})),
+  step('I call the MCP tool get_my_following', (w) => callTool(w, 'get_my_following', {})),
+  step('I call the MCP tool get_post with post_id {post_id:d}', (w, [id]) =>
+    callTool(w, 'get_post', { post_id: Number(id) }),
+  ),
+  step('I call the MCP tool get_profile with slug "{slug}"', (w, [slug]) =>
+    callTool(w, 'get_profile', { slug }, { withToken: false }),
+  ),
+  step('I call the MCP tool get_profile_posts with slug "{slug}"', (w, [slug]) =>
+    callTool(w, 'get_profile_posts', { slug }, { withToken: false }),
+  ),
+  step('I call the MCP tool get_profile_notes with slug "{slug}"', (w, [slug]) =>
+    callTool(w, 'get_profile_notes', { slug }, { withToken: false }),
+  ),
+
   step('the MCP result field "{field}" is not null', (w, [field]) => {
     const v = ok(w)[field as string];
     expect(v).not.toBeNull();

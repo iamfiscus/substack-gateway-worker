@@ -175,6 +175,9 @@ export const commonSteps: StepRegistry<World> = [
   step('the response list "{field}" contains "{value}"', (w, [field, value]) => {
     expect(json(w)[field as string]).toContain(value);
   }),
+  step('the response path "{path}" equals JSON {value}', (w, [path, value]) => {
+    expect(walkPath(json(w), path as string)).toEqual(JSON.parse(value as string));
+  }),
   step('the response nested field "{parent}.{child}" is "{value}"', (w, [parent, child, value]) => {
     const p = json(w)[parent as string] as Record<string, unknown>;
     expect(p[child as string]).toBe(value);

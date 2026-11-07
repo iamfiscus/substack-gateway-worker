@@ -8,6 +8,10 @@ import { checkFeature } from '../auth/features';
 import { anonymousCredentials, type GatewayContext, type GatewayExtension } from '../context';
 import { APPLICATION_NAME, OSS_VERSION } from '../features';
 import { resolveMcpCredentials } from './credentials';
+import { registerFollowingTools } from './following';
+import { registerMeTools } from './me';
+import { registerPostsTools } from './posts';
+import { registerProfilesTools } from './profiles';
 
 export type ToolAnnotations = {
   title?: string;
@@ -28,6 +32,34 @@ export type McpToolDef<S extends z.ZodObject> = {
   /** Upstream `meta` (category, substack_endpoint) plus folded `tags`. */
   meta?: Record<string, unknown>;
 };
+
+/** Appended to every upstream tool description that takes `token`. */
+export const TOKEN_NOTE =
+  ' The `token` argument is optional: pass base64-encoded Substack credentials, or omit it if this deployment resolves credentials from the authenticated session.';
+
+/** FastMCP `get_meta()`: the tool's `meta` plus `fastmcp.tags` (sorted). */
+export function toolMeta(
+  category: string,
+  substackEndpoint: string,
+  tags: readonly string[],
+): Record<string, unknown> {
+  return {
+    category,
+    substack_endpoint: substackEndpoint,
+    fastmcp: { tags: [...tags].sort() },
+  };
+}
+
+/** Annotations shared by every upstream read tool. */
+export function readAnnotations(title: string): ToolAnnotations {
+  return {
+    title,
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: true,
+  };
+}
 
 export type ToolResult = {
   content: { type: 'text'; text: string }[];
@@ -117,7 +149,12 @@ export function mcpTool<S extends z.ZodObject>(
 }
 
 /** Domain tool registrars; each later task appends `register<Domain>Tools`. */
-const DOMAIN_TOOLS: ((server: McpServer, ctx: GatewayContext) => void)[] = [];
+const DOMAIN_TOOLS: ((server: McpServer, ctx: GatewayContext) => void)[] = [
+  registerProfilesTools,
+  registerPostsTools,
+  registerFollowingTools,
+  registerMeTools,
+];
 
 export function createMcpServer(
   ctx: GatewayContext,

@@ -46,14 +46,15 @@ export class SubstackClient extends SubstackHTTPBase {
   /** GET user-settings: the caller's own numeric user id. */
   async getOwnUserId(): Promise<number> {
     const r = await this.get('user-settings');
-    const settings = (r as { userSettings?: { userId?: unknown }[] } | null)?.userSettings;
+    const settings = (r as { userSettings?: { user_id?: unknown }[] } | null)?.userSettings;
     if (!Array.isArray(settings)) {
       throw new SubstackAPIError(502, 'Substack returned an unexpected user-settings response');
     }
     if (settings.length === 0) {
       throw new SubstackAPIError(502, 'Substack returned no user settings');
     }
-    const id = settings[0]?.userId;
+    // SubstackUserSetting has no alias generator: the inner field is snake_case.
+    const id = settings[0]?.user_id;
     if (typeof id !== 'number') {
       throw new SubstackAPIError(502, 'Substack returned an unexpected user-settings response');
     }
