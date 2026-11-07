@@ -17,6 +17,19 @@ export function isSpace(ch: string): boolean {
   return SPACE_CHAR.test(ch);
 }
 
+/**
+ * Python `text.strip(chars)`: with `chars`, strips those characters (each one
+ * UTF-16 unit); without, strips `isspace()` characters.
+ */
+export function pyStrip(text: string, chars?: string): string {
+  const drop = chars === undefined ? isSpace : (ch: string) => chars.includes(ch);
+  let start = 0;
+  let end = text.length;
+  while (start < end && drop(text.charAt(start))) start++;
+  while (end > start && drop(text.charAt(end - 1))) end--;
+  return text.slice(start, end);
+}
+
 /** CPython's default `sys.get_int_max_str_digits()`. */
 export const INT_MAX_STR_DIGITS = 4300;
 
