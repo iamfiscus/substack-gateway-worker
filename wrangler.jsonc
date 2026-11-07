@@ -1,0 +1,20 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "substack-gateway",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-22",
+  "compatibility_flags": ["nodejs_compat"],
+  "vars": {
+    "SUBSTACK_BASE_URL": "https://substack.com",
+    "SUBSTACK_TIMEOUT_SEC": "120",
+    "LOG_LEVEL": "info",
+    "STATS_TIMESERIES_WATERMARK_LAG_DAYS": "2"
+    // OWNER_ALLOWED_FEATURES is intentionally unset: the default list applies.
+  }
+  // Optional KV cache (owner mode stats cache). Uncomment and set the id:
+  // "kv_namespaces": [
+  //   { "binding": "GATEWAY_CACHE", "id": "<kv-namespace-id>" }
+  // ]
+  // Secrets (set with `wrangler secret put`): GATEWAY_API_KEYS, OWNER_PUBLICATION_URL,
+  // OWNER_SUBSTACK_SID, OWNER_CONNECT_SID, ADMIN_TOKEN
+}

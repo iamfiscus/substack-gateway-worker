@@ -1,0 +1,33 @@
+{
+  "name": "substack-gateway-worker",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Unofficial Cloudflare Worker port of substack-gateway-oss. Not affiliated with Substack.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "test": "vitest run --project node",
+    "test:workers": "vitest run --project workers --passWithNoTests",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "deploy": "wrangler deploy",
+    "golden": "echo 'golden: not yet implemented (Task 13)' && exit 0"
+  },
+  "dependencies": {
+    "@hono/zod-openapi": "^1.6.3",
+    "@modelcontextprotocol/server": "^2.4.0",
+    "hono": "^4.13.17",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@amiceli/vitest-cucumber": "^7.0.0",
+    "@biomejs/biome": "^2.6.6",
+    "@cloudflare/vitest-pool-workers": "^0.22.0",
+    "@cloudflare/workers-types": "^5.20261107.1",
+    "@types/node": "^26.6.6",
+    "typescript": "~5.8.2",
+    "vitest": "^4.1.12",
+    "wrangler": "^4.158.0"
+  }
+}

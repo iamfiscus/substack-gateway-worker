@@ -1,0 +1,7 @@
+# Copy to .dev.vars for local `wrangler dev`. Never commit .dev.vars.
+# Comma list of label:key or label:sha256:<hex>
+GATEWAY_API_KEYS=
+OWNER_PUBLICATION_URL=
+OWNER_SUBSTACK_SID=
+OWNER_CONNECT_SID=
+ADMIN_TOKEN=
