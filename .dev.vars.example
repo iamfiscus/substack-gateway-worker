@@ -1,7 +1,11 @@
 # Copy to .dev.vars for local `wrangler dev`. Never commit .dev.vars.
-# Comma list of label:key or label:sha256:<hex>
+# All blank = pass-through mode (callers send their own x-gateway-token).
+# Comma list of label:key or label:sha256:<hex>. Setting it turns on owner mode.
 GATEWAY_API_KEYS=
+# Owner mode: your credentials (full-account cookies, see README warnings).
 OWNER_PUBLICATION_URL=
 OWNER_SUBSTACK_SID=
 OWNER_CONNECT_SID=
+# Optional comma list of features allowed with owner cookies, e.g. api:notes:create,mcp:notes:create
+# OWNER_ALLOWED_FEATURES=
 ADMIN_TOKEN=

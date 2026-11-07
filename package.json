@@ -31,5 +31,24 @@
     "typescript": "~5.8.2",
     "vitest": "^4.1.12",
     "wrangler": "^4.158.0"
+  },
+  "cloudflare": {
+    "bindings": {
+      "GATEWAY_API_KEYS": {
+        "description": "Optional. Turns on owner mode. A comma list of `label:key` entries (or `label:sha256:<hex>` to store only a hash). Callers must then send `Authorization: Bearer <key>`. Generate a key with `openssl rand -hex 32`. Leave blank for open pass-through mode, where every caller supplies their own Substack cookies."
+      },
+      "OWNER_PUBLICATION_URL": {
+        "description": "Owner mode only. Your publication URL, for example `https://yourname.substack.com`. Set together with the two cookies below, or leave all three blank."
+      },
+      "OWNER_SUBSTACK_SID": {
+        "description": "Owner mode only. The value of your `substack.sid` cookie. This is a full-account credential and Substack's Terms may restrict automated use; see the README. Leave blank for pass-through mode."
+      },
+      "OWNER_CONNECT_SID": {
+        "description": "Owner mode only. The value of your `connect.sid` cookie. A full-account credential; see the README. Leave blank for pass-through mode."
+      },
+      "OWNER_ALLOWED_FEATURES": {
+        "description": "Optional. A comma list of feature names (for example `api:notes:create,mcp:notes:create`) allowed with your owner cookies. Leave blank for the default: reads, draft create/update, pre-publish checks and image upload only. Nothing publishes unless you add it."
+      }
+    }
   }
 }
