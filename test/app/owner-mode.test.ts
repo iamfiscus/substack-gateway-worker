@@ -7,7 +7,7 @@ import { mcpTool } from '../../src/mcp/server';
 import { restRoute } from '../../src/rest/credentials';
 import { encodeCredentials, TEST_ENV } from '../bdd/steps/common';
 import { MCP_HEADERS, readJsonRpc } from '../bdd/steps/mcp';
-import { createFakeSubstack } from '../support/fakeSubstack';
+import { createFakeSubstack, sample } from '../support/fakeSubstack';
 
 const OWNER_COOKIE = 'substack.sid=owner-sid; connect.sid=owner-connect';
 const TOKEN_COOKIE = 'substack.sid=tok-sid; connect.sid=tok-connect';
@@ -29,7 +29,7 @@ const TOKEN = encodeCredentials({
 const KEY = { authorization: 'Bearer abc' };
 
 // Placeholder MCP tools on the real mcpTool path.
-// TODO(Task 9): replace with the real notes tools (get_note, create_note).
+// TODO(Task 9): replace with the real create_note tool (get_note is real since Task 7).
 const placeholderTools: GatewayExtension = {
   name: 'test-placeholder-tools',
   registerMcp: (server) => {
@@ -41,7 +41,6 @@ const placeholderTools: GatewayExtension = {
       inputSchema: z.object({}),
       annotations: {},
     };
-    mcpTool(server, 'get_note', { ...def, feature: 'mcp:notes:get' }, echo);
     mcpTool(server, 'create_note', { ...def, feature: 'mcp:notes:create' }, echo);
   },
 };
@@ -51,6 +50,8 @@ function setup(env: GatewayEnv = OWNER_ENV) {
     'GET substack.com/api/v1/handle/options': { potentialHandles: [{ handle: 'owner' }] },
     'GET substack.com/api/v1/user/owner/public_profile': { id: 1, name: 'Owner', handle: 'owner' },
     'GET substack.com/api/v1/feed/following': {},
+    'GET tok.substack.com/api/v1/reader/comment/1': sample('reader/comment/131648795'),
+    'GET owner.substack.com/api/v1/reader/comment/1': sample('reader/comment/131648795'),
     'POST tok.substack.com/api/v1/notes-stub': { ok: true },
     'POST owner.substack.com/api/v1/notes-stub': { ok: true },
   });
@@ -239,15 +240,17 @@ describe('MCP endpoint', () => {
   });
 
   it('resolves owner credentials for a tool called without a token', async () => {
-    const { request } = setup();
+    const { request, fake } = setup();
     const { payload } = await mcpCall(request, '/mcp/', 'tools/call', {
       name: 'get_note',
-      arguments: {},
+      arguments: { note_id: 1 },
     });
     const result = payload.result as ToolCallResult;
     expect(result.isError).toBeFalsy();
-    expect(result.structuredContent).toEqual({ sid: 'owner-sid' });
-    expect(result.content[0]?.text).toBe('{"sid":"owner-sid"}');
+    expect(result.structuredContent).toMatchObject({ id: 131648795, body: expect.any(String) });
+    expect(fake.calls[0]?.headers.get('cookie')).toBe(
+      'substack.sid=owner-sid; connect.sid=owner-connect',
+    );
   });
 
   it('gates an owner-mode write tool', async () => {

@@ -107,4 +107,55 @@ export const readDomainSteps: StepRegistry<World> = [
       w.routes[`GET ${GLOBAL}/posts/by-id/${id}`] = status(Number(code));
     },
   ),
+
+  // posts: comments (upstream steps/posts.py)
+  step('the Substack comments endpoint returns the sample response for post {id:d}', (w, [id]) => {
+    w.routes[`GET ${pubHost(w)}/api/v1/post/${id}/comments`] = loadSample(`post/${id}/comments`);
+  }),
+  step(
+    'the Substack comments endpoint for post {id:d} returns status {status:d}',
+    (w, [id, code]) => {
+      w.routes[`GET ${pubHost(w)}/api/v1/post/${id}/comments`] = status(Number(code));
+    },
+  ),
+
+  // reader (upstream steps/reader.py, comment_engagement.py, note_engagement.py)
+  step(
+    'the Substack reader comment endpoint returns the sample response for id {id:d}',
+    (w, [id]) => {
+      w.routes[`GET ${pubHost(w)}/api/v1/reader/comment/${id}`] = loadSample(
+        `reader/comment/${id}`,
+      );
+    },
+  ),
+  step(
+    'the Substack reader comment endpoint for id {id:d} returns status {status:d}',
+    (w, [id, code]) => {
+      w.routes[`GET ${pubHost(w)}/api/v1/reader/comment/${id}`] = status(Number(code));
+    },
+  ),
+  step(
+    'the Substack reader comment endpoint for id {id:d} resolves to post {post_id:d}',
+    (w, [id, postId]) => {
+      w.routes[`GET ${pubHost(w)}/api/v1/reader/comment/${id}`] = {
+        item: {
+          entity_key: 'k',
+          context: { timestamp: '2024-01-15T10:00:00.000Z', users: [] },
+          post: { id: Number(postId), title: 'Parent post', post_date: '2024-01-15T10:00:00.000Z' },
+          comment: { id: Number(id), body: 'parent', name: 'Ann', reaction_count: 1 },
+        },
+      };
+    },
+  ),
+  step('the Substack comment replies endpoint for id {id:d} returns two replies', (w, [id]) => {
+    w.routes[`GET ${pubHost(w)}/api/v1/reader/comment/${id}/replies`] = twoReplies;
+  }),
+  // Upstream mocks note replies on the global host, comment replies on the publication host.
+  step('the Substack note-replies endpoint returns two replies for note {id:d}', (w, [id]) => {
+    w.routes[`GET ${GLOBAL}/reader/comment/${id}/replies`] = twoReplies;
+  }),
 ];
+
+const twoReplies = {
+  commentBranches: [{ comment: { id: 1, body: 'first' } }, { comment: { id: 2, body: 'second' } }],
+};

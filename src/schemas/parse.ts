@@ -17,3 +17,13 @@ export function parseSubstack<S extends z.ZodType>(
     .join('; ');
   throw new SubstackAPIError(502, `Substack ${what} response invalid: ${issues}`);
 }
+
+/**
+ * FastAPI `response_model_exclude_none` / pydantic `model_dump(exclude_none=True)`:
+ * drop top-level null and undefined fields.
+ */
+export function excludeNone<T extends object>(value: T): { [K in keyof T]?: NonNullable<T[K]> } {
+  return Object.fromEntries(
+    Object.entries(value).filter(([, v]) => v !== null && v !== undefined),
+  ) as { [K in keyof T]?: NonNullable<T[K]> };
+}

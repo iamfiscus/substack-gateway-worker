@@ -6,6 +6,7 @@
 import { expect } from 'vitest';
 import { createApp } from '../../../src/app';
 import { MissingCredentialsError } from '../../../src/auth/credentials';
+import { SubstackAuthError } from '../../../src/clients/errors';
 import { createFakeSubstack } from '../../support/fakeSubstack';
 import { type StepRegistry, step } from '../runner';
 import { encodeCredentials, type McpOutcome, type World, walkPath } from './common';
@@ -111,6 +112,21 @@ export const mcpSteps: StepRegistry<World> = [
   step('I call the MCP tool get_post with post_id {post_id:d}', (w, [id]) =>
     callTool(w, 'get_post', { post_id: Number(id) }),
   ),
+  step('I call the MCP tool get_note with note_id {id:d}', (w, [id]) =>
+    callTool(w, 'get_note', { note_id: Number(id) }),
+  ),
+  step('I call the MCP tool list_note_replies with note_id {id:d}', (w, [id]) =>
+    callTool(w, 'list_note_replies', { note_id: Number(id) }),
+  ),
+  step('I call the MCP tool get_post_comments with post_id {id:d}', (w, [id]) =>
+    callTool(w, 'get_post_comments', { post_id: Number(id) }),
+  ),
+  step('I call the MCP tool get_post_comment with comment_id {id:d}', (w, [id]) =>
+    callTool(w, 'get_post_comment', { comment_id: Number(id) }),
+  ),
+  step('I call the MCP tool list_post_comment_replies with comment_id {id:d}', (w, [id]) =>
+    callTool(w, 'list_post_comment_replies', { comment_id: Number(id) }),
+  ),
   step('I call the MCP tool get_profile with slug "{slug}"', (w, [slug]) =>
     callTool(w, 'get_profile', { slug }, { withToken: false }),
   ),
@@ -139,6 +155,10 @@ export const mcpSteps: StepRegistry<World> = [
   step('the MCP call fails with a tool error containing "{text}"', (w, [text]) => {
     expect(w.mcp?.isError, `expected a tool error, got ${w.mcp?.text}`).toBe(true);
     expect(w.mcp?.text).toContain(text);
+  }),
+  step('the MCP tool raises a SubstackAuthError', (w) => {
+    expect(w.mcp?.isError, `expected a tool error, got ${w.mcp?.text}`).toBe(true);
+    expect(w.mcp?.text).toContain(new SubstackAuthError().message);
   }),
   step('the MCP call fails asking for credentials', (w) => {
     expect(w.mcp?.isError, `expected a tool error, got ${w.mcp?.text}`).toBe(true);

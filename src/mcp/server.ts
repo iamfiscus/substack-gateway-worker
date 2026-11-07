@@ -7,9 +7,11 @@ import type { BearerCredentials } from '../auth/credentials';
 import { checkFeature } from '../auth/features';
 import { anonymousCredentials, type GatewayContext, type GatewayExtension } from '../context';
 import { APPLICATION_NAME, OSS_VERSION } from '../features';
+import { registerCommentsTools } from './comments';
 import { resolveMcpCredentials } from './credentials';
 import { registerFollowingTools } from './following';
 import { registerMeTools } from './me';
+import { registerNotesTools } from './notes';
 import { registerPostsTools } from './posts';
 import { registerProfilesTools } from './profiles';
 
@@ -154,6 +156,8 @@ const DOMAIN_TOOLS: ((server: McpServer, ctx: GatewayContext) => void)[] = [
   registerPostsTools,
   registerFollowingTools,
   registerMeTools,
+  registerNotesTools,
+  registerCommentsTools,
 ];
 
 export function createMcpServer(
