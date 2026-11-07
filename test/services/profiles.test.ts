@@ -92,3 +92,9 @@ it('wraps an invalid audience count to null instead of failing', async () => {
     recommendations: null,
   });
 });
+
+it.each(['.', '..', ''])('slug %j is a 404 without calling Substack', async (slug) => {
+  const { ctx, fake } = ctxWith(new NullValueCache(), {});
+  await expect(getProfile(ctx, creds, { slug })).rejects.toMatchObject({ status: 404 });
+  expect(fake.calls).toHaveLength(0);
+});

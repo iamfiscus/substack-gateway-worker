@@ -2,6 +2,7 @@
 // gateway_profiles_rest/router.py and gateway_me_rest/router.py (upstream bc2e875).
 
 import type { BearerCredentials } from '../auth/credentials';
+import { SubstackAPIError } from '../clients/errors';
 import { type GatewayContext, makeClients } from '../context';
 import type { NotesPageResponse } from '../schemas/notes';
 import { parseSubstack } from '../schemas/parse';
@@ -19,6 +20,10 @@ export async function getProfileBySlug(
   creds: BearerCredentials,
   slug: string,
 ): Promise<SubstackPublicProfile> {
+  // "." and ".." would be normalised away by URL parsing and hit another endpoint.
+  if (slug === '' || slug === '.' || slug === '..') {
+    throw new SubstackAPIError(404, 'Substack returned 404: HTTP 404');
+  }
   const { substack } = makeClients(ctx, creds);
   return ctx.valueCache.getOrCall(`gateway_profiles:public_profile:${slug}`, async () => {
     // encodeURIComponent: a slug is one path segment, never a path or a query.

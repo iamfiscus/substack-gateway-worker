@@ -24,6 +24,14 @@ function app() {
     'GET substack.com/api/v1/user/jakubslys/public_profile': sample(
       'user/jakubslys/public_profile',
     ),
+    'GET substack.com/api/v1/user-settings': { userSettings: [{ user_id: 254824415 }] },
+    'GET owner.substack.com/api/v1/notes': sample('notes'),
+    'GET owner.substack.com/api/v1/user/254824415/subscriber-lists': sample(
+      'user/254824415/subscriber-lists',
+    ),
+    'GET owner.substack.com/api/v1/reader/feed/profile/254824415': sample(
+      'feed/profile/254824415?types=note',
+    ),
     'GET substack.com/api/v1/profile/posts': sample('profile/posts'),
     'GET substack.com/api/v1/posts/by-id/987654': sample('posts/by-id/987654'),
   });
@@ -39,9 +47,9 @@ describe('owner feature gate on read routes', () => {
     '/api/v1/me/following',
     '/api/v1/profiles/jakubslys/posts',
     '/api/v1/profiles/jakubslys/notes',
-  ])('%s is disabled for owner credentials by default', async (path) => {
+  ])('%s is allowed for owner credentials by default', async (path) => {
     const res = await app()(path, KEY);
-    expect(res.status).toBe(403);
+    expect(res.status).toBe(200);
   });
 
   it.each(['/api/v1/me', '/api/v1/posts/987654'])('%s is allowed for the owner', async (path) => {

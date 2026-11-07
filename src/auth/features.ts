@@ -10,13 +10,21 @@ export class FeatureDisabledError extends Error {
   }
 }
 
+/** Every upstream read (last segment `get`/`list`, all stats) plus the safe draft writes. */
 const BASE_FEATURES = [
   'notes:get',
-  'posts:get',
-  'profiles:get',
+  'notes:replies:list',
   'comments:get',
+  'comments:replies:list',
+  'posts:get',
+  'posts:comments:list',
+  'profiles:get',
+  'profiles:posts:list',
+  'profiles:notes:list',
   'me:get',
-  'health:ready',
+  'me:notes:list',
+  'me:posts:list',
+  'me:following:list',
   'drafts:get',
   'drafts:list',
   'drafts:create',
@@ -24,15 +32,23 @@ const BASE_FEATURES = [
   'drafts:prepublish',
   'drafts:ai-detection',
   'stats:subscribers',
+  'stats:traffic:30d-views',
   'stats:arr',
   'stats:emails',
   'stats:dashboard',
+  'stats:dashboard:period',
   'stats:recommendations',
   'stats:post-counts',
+  'posts:stats:engagement',
+  'posts:stats:traffic',
+  'posts:stats:recipients',
+  'posts:stats:growth',
+  'posts:stats:discussion',
 ];
 
 export const DEFAULT_OWNER_FEATURES: ReadonlySet<string> = new Set([
   ...BASE_FEATURES.flatMap((f) => [`api:${f}`, `mcp:${f}`]),
+  'api:health:ready', // upstream defines no mcp:health:ready
   'api:images:create',
   'mcp:images:upload',
 ]);
