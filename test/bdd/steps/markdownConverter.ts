@@ -21,7 +21,7 @@ function convert(w: ConverterWorld, markdown: string): void {
 }
 
 /** Python `textwrap.dedent(s).strip()`: drop the common leading indent, trim. */
-function dedentStrip(s: string): string {
+export function dedentStrip(s: string): string {
   const lines = s.split('\n');
   const indents = lines
     .filter((line) => line.trim() !== '')

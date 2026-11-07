@@ -2,12 +2,16 @@
 // (bc2e875): draft Markdown -> Substack draft body, a thin facade over dialect/.
 //
 // `markdownToDraftDoc` parses the draft dialect into a ProseMirror doc
-// (throwing DraftMarkdownError on malformed dialect constructs). The way back,
-// `draftBodyToMarkdown`, comes with the serializer.
+// (throwing DraftMarkdownError on malformed dialect constructs);
+// `draftBodyToMarkdown` writes a stored draft body back as dialect Markdown,
+// losslessly: `markdownToDraftDoc(draftBodyToMarkdown(body))` gives back the
+// doc in `body` (with legacy paragraphs and headings given the default
+// `textAlign`).
 
 import { parseBlocks } from './dialect/blocks';
 import type { Node } from './dialect/inline';
-import { pyJsonDumps } from './dialect/pyJson';
+import { pyJsonDumps, pyJsonLoads } from './dialect/pyJson';
+import { serializeDoc } from './dialect/serialize';
 
 export function markdownToDraftDoc(markdown: string): Node {
   // Only expand literal `\n` escapes for single-line input (agents often send
@@ -22,4 +26,15 @@ export function markdownToDraftDoc(markdown: string): Node {
 /** `json.dumps(markdown_to_draft_doc(markdown), ensure_ascii=False)`. */
 export function markdownToDraftBody(markdown: string): string {
   return pyJsonDumps(markdownToDraftDoc(markdown));
+}
+
+/**
+ * A stored draft body (JSON text, read like `json.loads`) as dialect Markdown.
+ * Throws JSONDecodeError when `body` is not JSON.
+ */
+export function draftBodyToMarkdown(body: string): string {
+  // The trailing newline keeps the output multi-line, so feeding it back to
+  // `markdownToDraftDoc` never triggers the literal `\n` expansion.
+  const markdown = serializeDoc(pyJsonLoads(body));
+  return markdown ? `${markdown}\n` : '';
 }

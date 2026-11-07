@@ -1,11 +1,11 @@
 // Port of upstream packages/gateway_drafts/tests/test_draft_markdown_datawrapper.py
-// (bc2e875), test names in camelCase. The round trip needs draftBodyToMarkdown,
-// which comes with the serializer in Task 14.
+// (bc2e875), test names in camelCase.
 
 import { describe, expect, it } from 'vitest';
 import { DraftMarkdownError } from '../../src/converters/dialect/errors';
 import type { Node } from '../../src/converters/dialect/inline';
-import { markdownToDraftBody } from '../../src/converters/draftMarkdown';
+import { pyJsonDumps } from '../../src/converters/dialect/pyJson';
+import { draftBodyToMarkdown, markdownToDraftBody } from '../../src/converters/draftMarkdown';
 
 function nodes(markdown: string): Node[] {
   return (JSON.parse(markdownToDraftBody(markdown)) as Node).content ?? [];
@@ -22,8 +22,25 @@ describe('test_draft_markdown_datawrapper', () => {
     expect(nodes('```python\nprint(1)\n```')[0]?.type).toBe('highlighted_code_block');
   });
 
-  // TODO(Task 14): needs draftBodyToMarkdown.
-  it.todo('datawrapperNodeRoundTripsToFence');
+  it('datawrapperNodeRoundTripsToFence', () => {
+    // A stored datawrapper node carries thumbnails and metadata the
+    // ```datawrapper fence cannot express, so it is written verbatim as a
+    // substack-node fence and parses back to the very same node.
+    const node = {
+      type: 'datawrapper',
+      attrs: {
+        url: 'https://datawrapper.dwcdn.net/boimj/2/',
+        thumbnail_url: 'https://s3/x.png',
+        thumbnail_url_full: 'https://s3/x-full.png',
+        height: 400,
+        title: 'T',
+        description: '',
+      },
+    };
+    const markdown = draftBodyToMarkdown(JSON.stringify({ type: 'doc', content: [node] }));
+    expect(markdown).toBe(`\`\`\`substack-node\n${pyJsonDumps(node, 2)}\n\`\`\`\n`);
+    expect(nodes(markdown)).toStrictEqual([node]);
+  });
 
   it.each([
     'https://app.datawrapper.de/chart/AbC12/visualize',

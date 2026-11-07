@@ -1,11 +1,11 @@
 // Port of upstream packages/gateway_drafts/tests/test_draft_markdown_image.py
-// (bc2e875), test names in camelCase. The round trips need draftBodyToMarkdown,
-// which comes with the serializer in Task 14.
+// (bc2e875), test names in camelCase.
 
 import { describe, expect, it } from 'vitest';
 import { fillDefaults } from '../../src/converters/dialect/attrs';
 import type { Node } from '../../src/converters/dialect/inline';
-import { markdownToDraftBody } from '../../src/converters/draftMarkdown';
+import { draftBodyToMarkdown, markdownToDraftBody } from '../../src/converters/draftMarkdown';
+import { docWithImage } from './dialect/helpers';
 
 const HOSTED = 'https://substack-post-media.s3.amazonaws.com/public/images/cat_10x10.png';
 
@@ -37,8 +37,27 @@ describe('test_draft_markdown_image', () => {
     expect(node?.attrs?.alt).toBe('');
   });
 
-  // TODO(Task 14): needs draftBodyToMarkdown.
-  it.todo('captionedImageNodeRoundTrips');
-  it.todo('captionedImageWithNullAltRoundTrips');
-  it.todo('imageMarkdownCannotReproduceFallsBackToAVerbatimFence');
+  it('captionedImageNodeRoundTrips', () => {
+    const body = JSON.stringify(docWithImage({ src: HOSTED, alt: 'A cat', width: 10, height: 10 }));
+    const markdown = draftBodyToMarkdown(body);
+    expect(markdown).toBe(`![A cat](${HOSTED}){height=10 width=10}\n`);
+    expect(JSON.parse(markdownToDraftBody(markdown))).toStrictEqual(JSON.parse(body));
+  });
+
+  it('captionedImageWithNullAltRoundTrips', () => {
+    const body = JSON.stringify(docWithImage({ src: HOSTED, alt: null }));
+    expect(draftBodyToMarkdown(body)).toBe(`![](${HOSTED})\n`);
+  });
+
+  it('imageMarkdownCannotReproduceFallsBackToAVerbatimFence', () => {
+    // An image2 missing most of its attributes (or hosted elsewhere) cannot be
+    // written as ![alt](src) without changing the node, so it is kept verbatim.
+    const image = {
+      type: 'captionedImage',
+      content: [{ type: 'image2', attrs: { src: 'https://s3/x.png' } }],
+    };
+    const markdown = draftBodyToMarkdown(JSON.stringify({ type: 'doc', content: [image] }));
+    expect(markdown.startsWith('```substack-node\n')).toBe(true);
+    expect(nodes(markdown)).toStrictEqual([image]);
+  });
 });

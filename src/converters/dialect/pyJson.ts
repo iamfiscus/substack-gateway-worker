@@ -275,8 +275,16 @@ function dumpNumber(v: number): string {
   return floatRepr(v);
 }
 
-/** Python `json.dumps(value, ensure_ascii=False)` for JSON-shaped values. */
-export function pyJsonDumps(value: unknown): string {
+/**
+ * Python `json.dumps(value, ensure_ascii=False)` for JSON-shaped values; with
+ * `indent`, `json.dumps(value, indent=indent, ensure_ascii=False)` (items on
+ * their own lines, `","` item separator, empty containers as `[]` / `{}`).
+ */
+export function pyJsonDumps(value: unknown, indent?: number): string {
+  return dump(value, indent, 0);
+}
+
+function dump(value: unknown, indent: number | undefined, level: number): string {
   if (value === null) return 'null';
   switch (typeof value) {
     case 'string':
@@ -286,11 +294,18 @@ export function pyJsonDumps(value: unknown): string {
     case 'boolean':
       return value ? 'true' : 'false';
     case 'object': {
-      if (Array.isArray(value)) return `[${value.map(pyJsonDumps).join(', ')}]`;
-      const body = Object.entries(value as Record<string, unknown>).map(
-        ([k, v]) => `${dumpString(k)}: ${pyJsonDumps(v)}`,
-      );
-      return `{${body.join(', ')}}`;
+      const isList = Array.isArray(value);
+      const items = isList
+        ? value.map((v) => dump(v, indent, level + 1))
+        : Object.entries(value as Record<string, unknown>).map(
+            ([k, v]) => `${dumpString(k)}: ${dump(v, indent, level + 1)}`,
+          );
+      const [open, close] = isList ? ['[', ']'] : ['{', '}'];
+      if (indent === undefined) return `${open}${items.join(', ')}${close}`;
+      if (items.length === 0) return `${open}${close}`;
+      const inner = `\n${' '.repeat(indent * (level + 1))}`;
+      const outer = `\n${' '.repeat(indent * level)}`;
+      return `${open}${inner}${items.join(`,${inner}`)}${outer}${close}`;
     }
     default:
       throw new TypeError(`Object of type ${typeof value} is not JSON serializable`);
