@@ -1,6 +1,6 @@
 // Port of gateway_me_rest/router.py (upstream bc2e875).
 
-import { createRoute, z } from '@hono/zod-openapi';
+import { createRoute } from '@hono/zod-openapi';
 import { NotesPageResponse } from '../schemas/notes';
 import { CursorLimitPageQuery, CursorPageQuery } from '../schemas/pagination';
 import { PostsPageResponse } from '../schemas/posts';
@@ -8,12 +8,7 @@ import { ProfileResponse } from '../schemas/profiles';
 import { getMe, getMyNotes, getMyPosts } from '../services/me';
 import { restRoute } from './credentials';
 import { createRouter } from './errors';
-
-const tokenHeader = z.object({ 'x-gateway-token': z.string().optional() });
-const ok = (schema: z.ZodType) => ({
-  description: 'Successful Response',
-  content: { 'application/json': { schema } },
-});
+import { ok, tokenHeader } from './openapi';
 
 const meRoute = createRoute({
   method: 'get',

@@ -19,13 +19,9 @@ import {
 } from '../services/comments';
 import { restRoute } from './credentials';
 import { createRouter } from './errors';
+import { noContent, ok, tokenHeader } from './openapi';
 
-const tokenHeader = z.object({ 'x-gateway-token': z.string().optional() });
 const commentIdParam = z.object({ comment_id: z.coerce.number().int().gt(0) });
-const ok = (schema: z.ZodType) => ({
-  description: 'Successful Response',
-  content: { 'application/json': { schema } },
-});
 
 const getRoute = createRoute({
   method: 'get',
@@ -56,7 +52,6 @@ const postCommentsRoute = createRoute({
   responses: { 200: ok(CommentsResponse) },
 });
 
-const noContent = { 204: { description: 'Successful Response' } } as const;
 const commentBody = {
   required: true,
   content: { 'application/json': { schema: CreateCommentRequest } },

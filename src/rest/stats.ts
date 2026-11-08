@@ -47,12 +47,7 @@ import {
 } from '../services/stats';
 import { restRoute } from './credentials';
 import { createRouter } from './errors';
-
-const tokenHeader = z.object({ 'x-gateway-token': z.string().optional() });
-const ok = (schema: z.ZodType) => ({
-  description: 'Successful Response',
-  content: { 'application/json': { schema } },
-});
+import { ok, tokenHeader } from './openapi';
 
 // ISO lower bound; Python `re.match` anchors the start only. A calendar-invalid
 // date (2025-02-31) is a 422 here rather than upstream's unhandled ValueError.

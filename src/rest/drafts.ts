@@ -41,18 +41,9 @@ import {
 import { dataUri } from '../services/images';
 import { restRoute } from './credentials';
 import { createRouter, HttpError } from './errors';
+import { jsonBody, noContent, ok, tokenHeader } from './openapi';
 
-const tokenHeader = z.object({ 'x-gateway-token': z.string().optional() });
 const draftIdParam = z.object({ draft_id: z.coerce.number().int().gt(0) });
-const ok = (schema: z.ZodType) => ({
-  description: 'Successful Response',
-  content: { 'application/json': { schema } },
-});
-const noContent = { 204: { description: 'Successful Response' } } as const;
-const jsonBody = <T extends z.ZodType>(schema: T) => ({
-  required: true,
-  content: { 'application/json': { schema } },
-});
 
 /** Upstream's 400 (malformed dialect) and 409 (stale `expected_updated_at`). */
 function mapDraftErrors(err: unknown): never {

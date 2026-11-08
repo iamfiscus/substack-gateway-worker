@@ -4,6 +4,7 @@ import { createRoute, z } from '@hono/zod-openapi';
 import { makeClients } from '../context';
 import { restRoute } from './credentials';
 import { createRouter, HttpError } from './errors';
+import { tokenHeader } from './openapi';
 
 const LivenessResponse = z.object({ status: z.string() }).openapi('LivenessResponse');
 
@@ -20,8 +21,6 @@ const QueryBool = z.stringbool({
   truthy: ['true', '1', 'yes', 'on', 'y', 't'],
   falsy: ['false', '0', 'no', 'off', 'n', 'f'],
 });
-
-const tokenHeader = z.object({ 'x-gateway-token': z.string().optional() });
 
 const liveRoute = createRoute({
   method: 'get',

@@ -1,10 +1,11 @@
 // Port of gateway_following_rest/router.py (upstream bc2e875).
 
-import { createRoute, z } from '@hono/zod-openapi';
+import { createRoute } from '@hono/zod-openapi';
 import { FollowingResponse } from '../schemas/following';
 import { getMyFollowing } from '../services/following';
 import { restRoute } from './credentials';
 import { createRouter } from './errors';
+import { tokenHeader } from './openapi';
 
 const route = createRoute({
   method: 'get',
@@ -12,7 +13,7 @@ const route = createRoute({
   tags: ['following'],
   summary: 'Get Me Following',
   description: 'Return the list of users the authenticated user follows.',
-  request: { headers: z.object({ 'x-gateway-token': z.string().optional() }) },
+  request: { headers: tokenHeader },
   responses: {
     200: {
       description: 'Successful Response',

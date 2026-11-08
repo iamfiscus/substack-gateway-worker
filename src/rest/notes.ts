@@ -21,13 +21,9 @@ import {
 } from '../services/notes';
 import { restRoute } from './credentials';
 import { createRouter, HttpError } from './errors';
+import { jsonBody, noContent, ok, tokenHeader } from './openapi';
 
-const tokenHeader = z.object({ 'x-gateway-token': z.string().optional() });
 const noteIdParam = z.object({ note_id: z.coerce.number().int().gt(0) });
-const ok = (schema: z.ZodType) => ({
-  description: 'Successful Response',
-  content: { 'application/json': { schema } },
-});
 
 const getRoute = createRoute({
   method: 'get',
@@ -47,12 +43,6 @@ const repliesRoute = createRoute({
   description: 'List direct replies to a note (or any node in its thread).',
   request: { headers: tokenHeader, params: noteIdParam },
   responses: { 200: ok(NoteRepliesResponse) },
-});
-
-const noContent = { 204: { description: 'Successful Response' } } as const;
-const jsonBody = <T extends z.ZodType>(schema: T) => ({
-  required: true,
-  content: { 'application/json': { schema } },
 });
 
 const deleteRoute = createRoute({

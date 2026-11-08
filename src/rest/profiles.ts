@@ -8,13 +8,9 @@ import { ProfileResponse } from '../schemas/profiles';
 import { getProfile, getProfileNotes, getProfilePosts } from '../services/profiles';
 import { restRoute } from './credentials';
 import { createRouter } from './errors';
+import { ok, tokenHeader } from './openapi';
 
-const tokenHeader = z.object({ 'x-gateway-token': z.string().optional() });
 const slugParam = z.object({ slug: z.string() });
-const ok = (schema: z.ZodType) => ({
-  description: 'Successful Response',
-  content: { 'application/json': { schema } },
-});
 
 const getRoute = createRoute({
   method: 'get',

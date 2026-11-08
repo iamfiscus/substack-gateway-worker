@@ -5,12 +5,12 @@ import { FullPostResponse } from '../schemas/posts';
 import { getPost, likePost, restackPost, unlikePost } from '../services/posts';
 import { restRoute } from './credentials';
 import { createRouter } from './errors';
+import { noContent, tokenHeader } from './openapi';
 
 const request = {
-  headers: z.object({ 'x-gateway-token': z.string().optional() }),
+  headers: tokenHeader,
   params: z.object({ post_id: z.coerce.number().int().gt(0) }),
 };
-const noContent = { 204: { description: 'Successful Response' } } as const;
 
 const route = createRoute({
   method: 'get',
