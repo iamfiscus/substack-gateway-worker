@@ -1,7 +1,9 @@
 // Ported from upstream e2e: notes.feature (create/delete), drafts.feature, comments.feature.
-// Writes to Substack: run only against the throwaway publication. Skipped when
-// unless E2E_ALLOW_WRITES=1, and never against a host containing "nerding".
+// Writes to Substack: run only against the throwaway publication. Skipped unless
+// E2E_ALLOW_WRITES equals the exact host of E2E_BASE_URL, and never against a
+// host containing "nerding".
 import { afterEach, describe, expect, it } from 'vitest';
+import { cleanupDrafts } from './guard';
 import {
   call,
   commentsEnabled,
@@ -23,17 +25,8 @@ describe.skipIf(!enabled || !writesAllowed)(
   () => {
     const drafts: string[] = [];
     afterEach(async () => {
-      // Cleanup tolerates only a disabled-feature 403; anything else is reported.
-      for (const id of drafts.splice(0)) {
-        try {
-          if ((await deleteDraft(id)) === 'forbidden') {
-            console.warn(`e2e: draft ${id} left behind (drafts:delete disabled)`);
-          }
-        } catch (err) {
-          console.warn(`e2e: cleanup of draft ${id} failed:`, err);
-          throw err;
-        }
-      }
+      // Every draft is attempted; 403/404 warn, other failures are thrown together.
+      await cleanupDrafts(drafts.splice(0), deleteDraft);
     });
 
     it('creates, fetches and deletes a note (needs api:notes:create + api:notes:delete)', async () => {

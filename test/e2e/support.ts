@@ -7,20 +7,27 @@
 // Optional fixtures (scenarios that need one skip when it is unset):
 //   E2E_PROFILE_SLUG, E2E_POST_ID, E2E_NOTE_ID
 // Optional switches:
-//   E2E_ALLOW_WRITES=1    opt in to scenarios that write to Substack (default: reads only).
+//   E2E_ALLOW_WRITES=<host> opt in to scenarios that write to Substack (default: reads
+//                         only). Must equal the exact host of E2E_BASE_URL, e.g.
+//                         substack-gateway-throwaway.<sub>.workers.dev; "1" does nothing.
 //                         Refused regardless when E2E_BASE_URL contains "nerding".
 //   E2E_ENABLE_COMMENTS=1 run the post-comment lifecycle (needs the comment write
 //                         features listed in OWNER_ALLOWED_FEATURES)
 //   E2E_REQUEST_INTERVAL_SEC (default 1), E2E_429_RETRIES (4), E2E_429_BACKOFF_SEC (5)
 
+import { type DeleteOutcome, hostOf, writesAllowedFor } from './guard';
+
 export const BASE_URL = (process.env.E2E_BASE_URL ?? '').trim().replace(/\/+$/, '');
 export const GATEWAY_KEY = (process.env.E2E_GATEWAY_KEY ?? '').trim();
 export const enabled = BASE_URL !== '' && GATEWAY_KEY !== '';
 export const isMainInstance = BASE_URL.toLowerCase().includes('nerding');
-export const writesRequested = process.env.E2E_ALLOW_WRITES === '1';
-export const writesAllowed = writesRequested && !isMainInstance;
-if (enabled && writesRequested && isMainInstance) {
-  console.warn(`e2e: refusing write scenarios against ${BASE_URL} (main instance); reads only`);
+export const writesRequested = (process.env.E2E_ALLOW_WRITES ?? '').trim() !== '';
+export const writesAllowed = writesAllowedFor(BASE_URL, process.env.E2E_ALLOW_WRITES);
+if (enabled && writesRequested && !writesAllowed) {
+  const why = isMainInstance
+    ? 'main instance'
+    : `E2E_ALLOW_WRITES must equal the E2E_BASE_URL host ${hostOf(BASE_URL)}`;
+  console.warn(`e2e: refusing write scenarios against ${BASE_URL} (${why}); reads only`);
 }
 export const commentsEnabled = process.env.E2E_ENABLE_COMMENTS === '1';
 export const PROFILE_SLUG = (process.env.E2E_PROFILE_SLUG ?? '').trim();
@@ -82,10 +89,11 @@ export function expectStatus(r: Reply, status: number): void {
   if (r.status !== status) throw new Error(`Expected ${status}, got ${r.status}: ${r.text}`);
 }
 
-/** Best-effort delete used for cleanup; a disabled feature (403) is tolerated. */
-export async function deleteDraft(id: string): Promise<'deleted' | 'forbidden'> {
+/** Delete used for cleanup: 403 (feature disabled) and 404 (already gone) are reported, not thrown. */
+export async function deleteDraft(id: string): Promise<DeleteOutcome> {
   const r = await del(`/api/v1/drafts/${id}`);
-  if (r.status === 204 || r.status === 404) return 'deleted';
+  if (r.status === 204) return 'deleted';
+  if (r.status === 404) return 'missing';
   if (r.status === 403) return 'forbidden';
   throw new Error(`Expected 204, got ${r.status}: ${r.text}`);
 }
