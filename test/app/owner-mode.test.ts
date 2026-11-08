@@ -108,6 +108,28 @@ describe('owner mode: gateway key gate (C6)', () => {
     expect(lines.join('\n')).toContain('GATEWAY_API_KEYS is malformed');
     expect(lines.join('\n')).not.toContain('secret');
   });
+
+  it('answers a generic 500 for a mixed OWNER_ALLOWED_FEATURES, never echoing it', async () => {
+    const lines: string[] = [];
+    vi.spyOn(console, 'log').mockImplementation((l: string) => lines.push(l));
+    const env = { ...OWNER_ENV, OWNER_ALLOWED_FEATURES: '+api:notes:create,api:secretfeature' };
+    const { request } = setup(env);
+    const res = await request('/api/v1/me', { headers: KEY });
+    expect(res.status).toBe(500);
+    const text = await res.text();
+    expect(JSON.parse(text)).toEqual({ detail: 'gateway misconfigured' });
+    expect((await request('/api/v1/health/live')).status).toBe(200);
+    const { res: mcpRes } = await mcpCall(request, '/mcp', 'tools/list', {});
+    expect(mcpRes.status).toBe(500);
+    expect(lines.join('\n')).toContain('OWNER_ALLOWED_FEATURES is malformed');
+    expect(lines.join('\n')).not.toContain('secretfeature');
+  });
+
+  it('a `+` OWNER_ALLOWED_FEATURES list keeps the defaults and adds to them', async () => {
+    const env = { ...OWNER_ENV, OWNER_ALLOWED_FEATURES: '+api:notes:create' };
+    const { request } = setup(env);
+    expect((await request('/api/v1/me', { headers: KEY })).status).toBe(200);
+  });
 });
 
 describe('owner mode: resolved credentials', () => {

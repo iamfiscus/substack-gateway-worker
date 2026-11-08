@@ -48,7 +48,7 @@
         "description": "Owner mode only. The value of your `connect.sid` cookie. A full-account credential; see the README. Leave blank for pass-through mode."
       },
       "OWNER_ALLOWED_FEATURES": {
-        "description": "Optional. A comma list of feature names (for example `api:notes:create,mcp:notes:create`) allowed with your owner cookies. Leave blank for the default: reads, draft create/update, pre-publish checks and image upload only. Nothing publishes unless you add it."
+        "description": "Optional. Feature names allowed with your owner cookies. Prefix each entry with `+` to add it to the default (for example `+api:notes:create,+mcp:notes:create`); a list without `+` replaces the default. Do not mix the two forms. Leave blank for the default: reads, draft create/update, pre-publish checks and image upload only. Nothing publishes unless you add it."
       }
     }
   }

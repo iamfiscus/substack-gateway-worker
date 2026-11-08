@@ -89,4 +89,27 @@ describe('owner feature gate', () => {
     const s = ownerFeatures({ OWNER_ALLOWED_FEATURES: ' api:notes:create , ,mcp:notes:create' });
     expect([...s].sort()).toEqual(['api:notes:create', 'mcp:notes:create']);
   });
+
+  it('ownerFeatures adds `+` entries to the default set', () => {
+    const s = ownerFeatures({ OWNER_ALLOWED_FEATURES: '+api:notes:create, +mcp:notes:create' });
+    expect(s.size).toBe(DEFAULT_OWNER_FEATURES.size + 2);
+    for (const f of DEFAULT_OWNER_FEATURES) expect(s.has(f), f).toBe(true);
+    expect(s.has('api:notes:create')).toBe(true);
+    expect(s.has('mcp:notes:create')).toBe(true);
+    expect(DEFAULT_OWNER_FEATURES.has('api:notes:create')).toBe(false);
+  });
+
+  it('ownerFeatures rejects a list mixing `+` and plain entries, never echoing it', () => {
+    const run = () =>
+      ownerFeatures({ OWNER_ALLOWED_FEATURES: '+api:notes:create,api:secret-ish:get' });
+    expect(run).toThrow('invalid OWNER_ALLOWED_FEATURES');
+    try {
+      run();
+    } catch (err) {
+      expect(String((err as Error).message)).not.toContain('secret-ish');
+    }
+    expect(() => ownerFeatures({ OWNER_ALLOWED_FEATURES: '+' })).toThrow(
+      'invalid OWNER_ALLOWED_FEATURES',
+    );
+  });
 });

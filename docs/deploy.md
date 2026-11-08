@@ -36,7 +36,9 @@ Make a hashed key entry with `printf '%s' "$KEY" | shasum -a 256` and store
 `ci:sha256:<hex>`. Do not use a raw key that itself starts with `sha256:`.
 
 Optional var `OWNER_ALLOWED_FEATURES` (in `wrangler.jsonc` `vars`): a comma list of
-`api:...` / `mcp:...` feature names usable with the owner's cookies. See
+`api:...` / `mcp:...` feature names usable with the owner's cookies. Prefix them
+with `+` (`+api:notes:create,+mcp:notes:create`) to add to the default list;
+without `+` the list replaces it. See
 [Authentication](authentication.md).
 
 ### Local development

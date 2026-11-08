@@ -117,6 +117,15 @@ export function createApp(opts: CreateAppOptions = {}): Hono<AppEnv> {
     const log = createLogger(config.logLevel);
     const requestId = c.req.header('x-request-id') || crypto.randomUUID();
     const path = c.req.path;
+    let allowed: ReadonlySet<string>;
+    let featuresMalformed = false;
+    try {
+      allowed = ownerFeatures(env);
+    } catch {
+      // Fail closed: no owner feature is allowed, and non-public paths answer 500.
+      allowed = new Set();
+      featuresMalformed = true;
+    }
     const gw: GatewayContext = {
       env,
       config,
@@ -128,7 +137,7 @@ export function createApp(opts: CreateAppOptions = {}): Hono<AppEnv> {
       resolver: providers.credentialResolver ?? ownerResolver(env),
       requestId,
       authInfo: null,
-      ownerFeatures: ownerFeatures(env),
+      ownerFeatures: allowed,
       log,
     };
     c.set('gw', gw);
@@ -151,6 +160,10 @@ export function createApp(opts: CreateAppOptions = {}): Hono<AppEnv> {
     };
 
     if (!PUBLIC_PATHS.has(path)) {
+      if (featuresMalformed) {
+        log.error('OWNER_ALLOWED_FEATURES is malformed', { request_id: requestId });
+        return finish(c.json({ detail: GATEWAY_MISCONFIGURED }, 500));
+      }
       if (key.kind === 'misconfigured') {
         log.error('GATEWAY_API_KEYS is malformed', { request_id: requestId });
         return finish(c.json({ detail: GATEWAY_MISCONFIGURED }, 500));

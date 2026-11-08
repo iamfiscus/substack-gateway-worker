@@ -53,6 +53,13 @@ export const DEFAULT_OWNER_FEATURES: ReadonlySet<string> = new Set([
   'mcp:images:upload',
 ]);
 
+export const INVALID_OWNER_FEATURES = 'invalid OWNER_ALLOWED_FEATURES';
+
+/**
+ * `OWNER_ALLOWED_FEATURES`: unset or blank → the default set. A list whose
+ * entries all start with `+` adds them to the default set; a list with no `+`
+ * entries replaces it. Mixing both forms throws (the message never echoes the value).
+ */
 export function ownerFeatures(env: { OWNER_ALLOWED_FEATURES?: string }): ReadonlySet<string> {
   const raw = env.OWNER_ALLOWED_FEATURES;
   if (raw === undefined) return DEFAULT_OWNER_FEATURES;
@@ -60,7 +67,13 @@ export function ownerFeatures(env: { OWNER_ALLOWED_FEATURES?: string }): Readonl
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean);
-  return items.length > 0 ? new Set(items) : DEFAULT_OWNER_FEATURES;
+  if (items.length === 0) return DEFAULT_OWNER_FEATURES;
+  const additive = items.filter((s) => s.startsWith('+'));
+  if (additive.length === 0) return new Set(items);
+  if (additive.length !== items.length) throw new Error(INVALID_OWNER_FEATURES);
+  const added = additive.map((s) => s.slice(1).trim());
+  if (added.some((s) => s === '')) throw new Error(INVALID_OWNER_FEATURES);
+  return new Set([...DEFAULT_OWNER_FEATURES, ...added]);
 }
 
 export function checkFeature(

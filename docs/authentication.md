@@ -72,9 +72,20 @@ the safe draft writes (`drafts:create`, `drafts:update`, `drafts:prepublish`,
 `drafts:ai-detection`), each as `api:` and `mcp:` names, plus these exact names:
 `api:health:ready` (REST only; there is no MCP readiness tool),
 `api:images:create` and `mcp:images:upload`. Notes creation, replies, comments,
-likes, deletes, scheduling and restacking are off unless you list them. Setting
-`OWNER_ALLOWED_FEATURES` replaces the default list entirely, so spell out
-everything you want. The full list is in `src/auth/features.ts`.
+likes, deletes, scheduling and restacking are off unless you list them. The full
+default list is in `src/auth/features.ts`.
+
+`OWNER_ALLOWED_FEATURES` takes one of two forms:
+
+- **Additive.** Every entry starts with `+`, and each is added to the default
+  list. `+api:notes:create,+mcp:notes:create` keeps all the defaults and also
+  lets the owner's cookies create notes over REST and MCP.
+- **Replacing.** No entry starts with `+`. The list replaces the default
+  entirely, so spell out everything you want, reads included.
+
+Mixing the forms (`+api:notes:create,api:notes:get`) is a configuration error:
+every route except the public ones answers `500 {"detail":"gateway misconfigured"}`
+and the value is never echoed. A blank value means the default list.
 
 ## Credential shape
 

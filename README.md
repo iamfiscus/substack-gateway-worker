@@ -38,7 +38,10 @@ default only reads (`get`/`list` and all stats), `drafts:create`,
 `drafts:update`, `drafts:prepublish`, `drafts:ai-detection`, image upload and
 `health:ready` work with your cookies, as `api:` and `mcp:` names. Creating
 notes, comments, likes, deletes, scheduling and restacking are off until you list
-them. The Worker never publishes or schedules anything on its own, and has no
+them. Prefix entries with `+` to add them to the default, for example
+`+api:notes:create,+mcp:notes:create`; a list without `+` replaces the default
+entirely. Mixing the two forms is rejected as a misconfiguration. See
+[Authentication](docs/authentication.md). The Worker never publishes or schedules anything on its own, and has no
 crons.
 
 ## Getting your cookies

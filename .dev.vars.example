@@ -6,7 +6,9 @@ GATEWAY_API_KEYS=
 OWNER_PUBLICATION_URL=
 OWNER_SUBSTACK_SID=
 OWNER_CONNECT_SID=
-# Optional comma list of features allowed with owner cookies, e.g. api:notes:create,mcp:notes:create
+# Optional comma list of features allowed with owner cookies. Entries starting with `+` are
+# added to the default list, e.g. +api:notes:create,+mcp:notes:create; a list with no `+`
+# entries replaces the default. Mixing both forms is a configuration error.
 # OWNER_ALLOWED_FEATURES=
 # Reserved for extension admin routes; unused by the core Worker.
 ADMIN_TOKEN=
