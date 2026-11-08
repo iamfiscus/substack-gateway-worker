@@ -2,12 +2,13 @@
 // Jakub Slys). Gated on E2E_BASE_URL and E2E_GATEWAY_KEY; never runs in `npm test`.
 //
 // Point it only at an instance wired to a throwaway publication (or, read-only,
-// at the main instance with E2E_READ_ONLY=1).
+// at the main instance, where only reads ever run).
 //
 // Optional fixtures (scenarios that need one skip when it is unset):
 //   E2E_PROFILE_SLUG, E2E_POST_ID, E2E_NOTE_ID
 // Optional switches:
-//   E2E_READ_ONLY=1       skip every scenario that writes to Substack
+//   E2E_ALLOW_WRITES=1    opt in to scenarios that write to Substack (default: reads only).
+//                         Refused regardless when E2E_BASE_URL contains "nerding".
 //   E2E_ENABLE_COMMENTS=1 run the post-comment lifecycle (needs the comment write
 //                         features listed in OWNER_ALLOWED_FEATURES)
 //   E2E_REQUEST_INTERVAL_SEC (default 1), E2E_429_RETRIES (4), E2E_429_BACKOFF_SEC (5)
@@ -15,7 +16,12 @@
 export const BASE_URL = (process.env.E2E_BASE_URL ?? '').trim().replace(/\/+$/, '');
 export const GATEWAY_KEY = (process.env.E2E_GATEWAY_KEY ?? '').trim();
 export const enabled = BASE_URL !== '' && GATEWAY_KEY !== '';
-export const readOnly = ['1', 'true'].includes((process.env.E2E_READ_ONLY ?? '').toLowerCase());
+export const isMainInstance = BASE_URL.toLowerCase().includes('nerding');
+export const writesRequested = process.env.E2E_ALLOW_WRITES === '1';
+export const writesAllowed = writesRequested && !isMainInstance;
+if (enabled && writesRequested && isMainInstance) {
+  console.warn(`e2e: refusing write scenarios against ${BASE_URL} (main instance); reads only`);
+}
 export const commentsEnabled = process.env.E2E_ENABLE_COMMENTS === '1';
 export const PROFILE_SLUG = (process.env.E2E_PROFILE_SLUG ?? '').trim();
 export const POST_ID = (process.env.E2E_POST_ID ?? '').trim();
