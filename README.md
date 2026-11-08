@@ -137,7 +137,9 @@ Changed behaviour:
   additions.
 - `POST /api/v1/images` and the `upload_image` MCP tool refuse images over
   10 MB (`413 {"detail":"Image too large (max 10 MB)"}` on REST, checked from
-  `Content-Length` before the body is read and again on the file size; a tool
+  `Content-Length` before the body is read and again on the file size; an upload
+  without a numeric `Content-Length`, such as a chunked one, is
+  `411 {"detail":"Content-Length required"}`; a tool
   error on MCP, whose transport already caps a request at 4 MB). Upstream has
   no cap.
 - An incoming `X-Request-ID` is reused only if it is at most 128 characters of

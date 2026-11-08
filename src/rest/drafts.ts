@@ -164,11 +164,17 @@ const ImageUploadForm = z.object({
 
 /** Room for the multipart boundaries and part headers around a maximum-size file. */
 const MULTIPART_OVERHEAD = 64 * 1024;
+const LENGTH_REQUIRED = 'Content-Length required';
 
-/** Reject an oversized upload from its Content-Length, before the body is read. */
+/**
+ * Size the upload from its Content-Length before the body is read: missing or
+ * not a plain decimal (e.g. a chunked upload) is a 411, so formData() never
+ * buffers an unbounded body; over the cap is a 413.
+ */
 const imageSizeGuard: MiddlewareHandler<AppEnv> = async (c, next) => {
-  const length = Number(c.req.header('content-length'));
-  if (Number.isFinite(length) && length > MAX_IMAGE_BYTES + MULTIPART_OVERHEAD) {
+  const header = c.req.header('content-length')?.trim() ?? '';
+  if (!/^\d+$/.test(header)) return c.json({ detail: LENGTH_REQUIRED }, 411);
+  if (Number(header) > MAX_IMAGE_BYTES + MULTIPART_OVERHEAD) {
     return c.json({ detail: IMAGE_TOO_LARGE }, 413);
   }
   await next();

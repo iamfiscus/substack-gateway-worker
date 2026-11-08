@@ -63,11 +63,18 @@ describe('workerd: image upload', () => {
     const gw = createGateway({ fetcher: fake });
     const form = new FormData();
     form.append('file', new File([png], 'big.png', { type: 'image/png' }));
+    // Serialised with its Content-Length, as a real client sends it (the route requires one).
+    const encoded = new Request('https://form.local/', { method: 'POST', body: form });
+    const body = await encoded.arrayBuffer();
     const res = await gw.fetch(
       new Request('https://gw.test/api/v1/images', {
         method: 'POST',
-        headers: { 'x-gateway-token': TOKEN },
-        body: form,
+        headers: {
+          'x-gateway-token': TOKEN,
+          'content-type': encoded.headers.get('content-type') ?? '',
+          'content-length': String(body.byteLength),
+        },
+        body,
       }),
       BASE_ENV,
     );

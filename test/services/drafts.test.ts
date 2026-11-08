@@ -34,6 +34,7 @@ import {
 import { createWorld, encodeCredentials, send, type World } from '../bdd/steps/common';
 import { callTool, mcpRequest } from '../bdd/steps/mcp';
 import { createFakeSubstack } from '../support/fakeSubstack';
+import { formBody } from '../support/form';
 
 const PUB = 'example.substack.com/api/v1';
 const CURRENT = '2026-03-01T09:53:35.569Z';
@@ -449,9 +450,10 @@ describe('test_images_endpoint', () => {
     const { createApp } = await import('../../src/app');
     w.fake = createFakeSubstack(w.routes);
     const app = createApp({ fetcher: w.fake });
+    const { body, headers } = await formBody(form);
     w.response = await app.request(
       '/api/v1/images',
-      { method: 'POST', headers: w.headers, body: form },
+      { method: 'POST', headers: { ...w.headers, ...headers }, body },
       w.env,
     );
     w.bodyText = await w.response.text();
@@ -543,6 +545,49 @@ describe('test_images_endpoint', () => {
     expect(await res.json()).toEqual({ detail: 'Image too large (max 10 MB)' });
     expect(pulled).toBe(false);
     expect(fake.calls).toHaveLength(0);
+  });
+
+  async function rawUpload(headers: Record<string, string>) {
+    const { createApp } = await import('../../src/app');
+    const w = restWorld();
+    const fake = createFakeSubstack(w.routes);
+    const app = createApp({ fetcher: fake });
+    let pulled = false;
+    const body = new ReadableStream(
+      {
+        pull(controller) {
+          pulled = true;
+          controller.close();
+        },
+      },
+      { highWaterMark: 0 },
+    );
+    const res = await app.request(
+      '/api/v1/images',
+      {
+        method: 'POST',
+        headers: { ...w.headers, 'content-type': 'multipart/form-data; boundary=x', ...headers },
+        body,
+        duplex: 'half',
+      } as RequestInit,
+      w.env,
+    );
+    return { res, pulled, fake };
+  }
+
+  it('a chunked upload without Content-Length is a 411 before the body is read', async () => {
+    const { res, pulled, fake } = await rawUpload({});
+    expect(res.status).toBe(411);
+    expect(await res.json()).toEqual({ detail: 'Content-Length required' });
+    expect(pulled).toBe(false);
+    expect(fake.calls).toHaveLength(0);
+  });
+
+  it.each(['abc', '-1', '1.5', '', ' '])('a Content-Length of %j is a 411', async (value) => {
+    const { res, pulled } = await rawUpload({ 'content-length': value });
+    expect(res.status).toBe(411);
+    expect(await res.json()).toEqual({ detail: 'Content-Length required' });
+    expect(pulled).toBe(false);
   });
 
   it('a missing file is a 422 and nothing is uploaded', async () => {

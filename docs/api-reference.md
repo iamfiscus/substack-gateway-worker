@@ -227,7 +227,9 @@ Cancels a draft's scheduled release. Returns `204 No Content`.
 
 Uploads an image file (multipart `file`) to Substack and returns its hosted
 URL and dimensions. Returns `201 Created`. Files over 10 MB are refused with
-`413 {"detail":"Image too large (max 10 MB)"}` (a port addition).
+`413 {"detail":"Image too large (max 10 MB)"}`, and a request without a numeric
+`Content-Length` (for example a chunked upload) with
+`411 {"detail":"Content-Length required"}` (port additions).
 
 ## Stats (8)
 
