@@ -10,5 +10,8 @@ Credit: copied from jakub-k-slys/substack-gateway-oss @ bc2e875.
 
 - `samples/` mirrors upstream `packages/gateway_oss/samples/api/v1/`.
 - `drafts/` holds `web_editor_draft.json`, `gateway_draft.json`, `legacy_gateway_draft.json`.
+- `upstream-features.json` lists every upstream feature string (the `_FEATURES` tuples of
+  each capability package plus `application_features.py`), extracted from the source;
+  `test/app/featureGate.test.ts` checks the gate against it.
 - `upstream-docs/` holds upstream `docs/mcp.md` and `docs/api-reference.md`, unchanged;
   `test/app/inventory.test.ts` checks the REST and MCP inventory against them.

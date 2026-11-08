@@ -152,6 +152,14 @@ function errMessage(err: unknown): string {
 
 const tokenField = z.string().nullish();
 
+/** Tool name → declared feature, filled as tools are registered (the same every request). */
+const TOOL_FEATURES = new Map<string, string | null>();
+
+/** The features declared by every tool registered so far, keyed by tool name. */
+export function declaredToolFeatures(): ReadonlyMap<string, string | null> {
+  return TOOL_FEATURES;
+}
+
 /**
  * Register a tool that takes an optional `token` (unless anonymous), resolves
  * credentials, checks the owner feature gate, and returns FastMCP-shaped output.
@@ -165,6 +173,7 @@ export function mcpTool<S extends z.ZodObject>(
   run: (args: z.infer<S>, creds: BearerCredentials, ctx: GatewayContext) => Promise<unknown>,
 ): void {
   const ctx = contextOf(server);
+  TOOL_FEATURES.set(name, def.feature);
   const inputSchema = def.anonymous
     ? def.inputSchema
     : def.inputSchema.extend({ token: tokenField });

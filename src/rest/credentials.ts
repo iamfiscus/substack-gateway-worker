@@ -77,6 +77,14 @@ export function restRoute<R extends RouteConfig = RouteConfig>(
       return errorResponse(c, err);
     }
   };
+  ROUTE_FEATURES.set(wrapped, feature);
   // Error responses are outside the route's declared response types by design.
   return wrapped as unknown as RouteHandler<R, AppEnv>;
+}
+
+const ROUTE_FEATURES = new WeakMap<object, string | null>();
+
+/** The feature a `restRoute` handler declared; undefined for any other handler. */
+export function declaredRouteFeature(handler: unknown): string | null | undefined {
+  return typeof handler === 'function' ? ROUTE_FEATURES.get(handler) : undefined;
 }
