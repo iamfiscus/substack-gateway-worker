@@ -10,8 +10,14 @@ adapted from upstream's docs of the same names (changed, see each file's header)
 `docs/drafts-markdown.md` is copied unchanged apart from its header notice (its
 body is byte-exact). `docs/extensions.md` and `docs/deploy.md` are new.
 
-Behaviour, messages and defaults are reproduced from upstream. Test fixtures
-(`test/fixtures/`) and Gherkin feature files (`test/features/`) are copied from
-upstream unchanged.
+Behaviour, messages and defaults are reproduced from upstream. Test material:
+
+- `test/fixtures/samples/` (upstream `packages/gateway_oss/samples/api/v1/`),
+  `test/fixtures/drafts/` (upstream `packages/gateway_drafts/tests/fixtures/`),
+  `test/fixtures/upstream-docs/` (upstream `docs/mcp.md` and `docs/api-reference.md`)
+  and the Gherkin feature files in `test/features/` are copied from upstream
+  unchanged.
+- `test/fixtures/golden/` is generated from upstream's converters by
+  `scripts/golden/generate.py`; it is upstream output, not hand-written.
 
 Unofficial. Not affiliated with Substack.

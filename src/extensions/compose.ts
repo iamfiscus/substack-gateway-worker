@@ -50,7 +50,7 @@ export function isOwnerMode(env: GatewayEnv): boolean {
 export const OWNER_MODE_REQUIRED =
   'kvStatsCache requires owner mode (GATEWAY_API_KEYS and OWNER_*)';
 
-/** Spec §10.4: an owner-only stats cache refuses to run without owner mode. */
+/** An owner-only stats cache refuses to run without owner mode: it would otherwise serve one tenant's stats to another. */
 export function assertOwnerModeFor(providers: ComposedProviders, env: GatewayEnv): void {
   if (providers.requiresOwnerMode && !isOwnerMode(env)) throw new Error(OWNER_MODE_REQUIRED);
 }

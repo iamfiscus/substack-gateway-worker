@@ -59,7 +59,7 @@ export const healthRouter = createRouter()
     readyRoute,
     restRoute<typeof readyRoute>('api:health:ready', async (c, { creds, source, ctx }) => {
       const show = c.req.valid('query').show ?? false;
-      // [C8] resolved (owner) credentials are never echoed.
+      // Resolved (owner) credentials are never echoed: the caller never supplied them.
       if (show && source === 'resolved') throw new HttpError(403, SHOW_DISABLED);
       const connected = await makeClients(ctx, creds).substack.checkConnectivity();
       return c.json(show ? { connected, tokens: { ...creds } } : { connected }, 200);

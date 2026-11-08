@@ -336,7 +336,7 @@ describe('write tools over /mcp', () => {
 });
 
 describe('204 responses', () => {
-  // Parity (Task 20 harness): FastAPI's Response(status_code=204) keeps its
+  // Parity (found by the differential harness): FastAPI's Response(status_code=204) keeps its
   // default `application/json` media type.
   it.each([
     ['DELETE', '/api/v1/notes/42', `DELETE ${PUB}/comment/42`],

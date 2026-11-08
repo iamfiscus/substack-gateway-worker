@@ -3,7 +3,7 @@
 ## 0.1.0 - 2026-11-07
 
 First release: an unofficial Cloudflare Worker port of
-[substack-gateway-oss](https://github.com/jakubslys/substack-gateway-oss) (upstream
+[substack-gateway-oss](https://github.com/jakub-k-slys/substack-gateway-oss) (upstream
 commit `bc2e875`). Not affiliated with Substack.
 
 - REST API with parity to upstream: 51 endpoints, OpenAPI document and Swagger UI.
@@ -16,8 +16,9 @@ commit `bc2e875`). Not affiliated with Substack.
   by default. Explicit `x-gateway-token` callers bypass the gate.
 - Extension API (`createGateway`, `GatewayExtension`): custom routes, MCP tools,
   authentication, credential resolvers, fetchers, and KV-backed value and stats caches.
-- Differential parity harness running upstream and the Worker side by side on Cloudflare
-  Sandbox, plus golden fixtures generated from upstream.
+- Differential parity harness that runs upstream and the Worker side by side and diffs
+  their responses: run locally; Sandbox-ready, not yet run on Cloudflare. Plus golden
+  fixtures generated from upstream.
 - Test suites: node unit and BDD tests, workerd runtime tests, and a live e2e suite
   (`npm run test:e2e`, gated on `E2E_BASE_URL` and `E2E_GATEWAY_KEY`, offline by default).
 - Docs: README, API and MCP references, authentication, deploy and extension guides.

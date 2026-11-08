@@ -82,7 +82,8 @@ export function anonymousCredentials(ctx: GatewayContext): BearerCredentials {
 }
 
 /**
- * [C9, spec §10.4] A stats cache is keyed by publication_url alone, so only
+ * A stats cache is keyed by publication_url alone (one tenant's cached stats
+ * must never reach a caller who merely names that URL), so only
  * requests whose credentials came from the resolver (the owner's) may use it.
  * Token-sourced requests get a context without it.
  */

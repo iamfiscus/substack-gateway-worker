@@ -1,4 +1,4 @@
-// KV-backed StatsCache, owner mode only (spec §10.4, C9). Upstream's cache is
+// KV-backed StatsCache, owner mode only. Upstream's cache is
 // keyed by publication_url alone, so serving it to a caller who merely names
 // that URL would leak one tenant's stats to another. createApp therefore
 // refuses it without owner mode, and the request scope hands it only to

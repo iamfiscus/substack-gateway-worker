@@ -1,4 +1,4 @@
-// Regression tests for the FastMCP parity gaps the Task 20 differential
+// Regression tests for the FastMCP parity gaps the differential
 // harness (harness/) found between upstream bc2e875 and this Worker.
 
 import { describe, expect, it } from 'vitest';

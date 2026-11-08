@@ -33,7 +33,7 @@ export type CreateAppOptions = { fetcher?: Fetcher; extensions?: GatewayExtensio
 /** Production fetcher: the Request goes through unchanged so `redirect: 'manual'` holds. */
 const defaultFetcher: Fetcher = (req) => fetch(req);
 
-/** [C6] Reachable without a gateway key even when GATEWAY_API_KEYS is set. */
+/** Reachable without a gateway key even when GATEWAY_API_KEYS is set (liveness probes and the root index). */
 const PUBLIC_PATHS = new Set(['/', '/api/v1/health/live']);
 /** Upstream's log filter drops lines for these paths. */
 const SILENT_PATHS = new Set(['/api/v1/health/live', '/api/v1/health/ready']);

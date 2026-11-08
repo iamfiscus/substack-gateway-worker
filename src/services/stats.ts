@@ -2,8 +2,9 @@
 // bc2e875). Services return Substack-shaped data (rows, snapshots); the
 // REST routes and MCP tools map it with src/schemas/stats.ts, as upstream does.
 //
-// `ctx.statsCache` is null until Task 17: with no cache nothing is retained
-// and every call reaches Substack.
+// `ctx.statsCache` is null unless an extension installs one (`kvStatsCache`,
+// owner mode only, and only for resolved credentials): with no cache nothing is
+// retained and every call reaches Substack.
 
 import { z } from 'zod';
 import type { BearerCredentials } from '../auth/credentials';
