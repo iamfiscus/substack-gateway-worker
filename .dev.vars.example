@@ -8,4 +8,5 @@ OWNER_SUBSTACK_SID=
 OWNER_CONNECT_SID=
 # Optional comma list of features allowed with owner cookies, e.g. api:notes:create,mcp:notes:create
 # OWNER_ALLOWED_FEATURES=
+# Reserved for extension admin routes; unused by the core Worker.
 ADMIN_TOKEN=

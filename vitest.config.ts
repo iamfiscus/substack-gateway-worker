@@ -9,7 +9,18 @@ export default defineConfig({
           name: 'node',
           environment: 'node',
           include: ['test/**/*.test.ts'],
-          exclude: ['test/workers/**', 'node_modules/**'],
+          exclude: ['test/workers/**', 'test/e2e/**', 'node_modules/**'],
+        },
+      },
+      {
+        // Live suite: self-skips unless E2E_BASE_URL and E2E_GATEWAY_KEY are set.
+        test: {
+          name: 'e2e',
+          environment: 'node',
+          include: ['test/e2e/**/*.test.ts'],
+          testTimeout: 180_000,
+          hookTimeout: 60_000,
+          fileParallelism: false,
         },
       },
       {

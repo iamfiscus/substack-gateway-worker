@@ -81,14 +81,14 @@ limits as published at
 <https://developers.cloudflare.com/workers/platform/limits/> (checked
 2026-11-07; re-check, they change):
 
-| Item                                                      | Measured or counted                                                                            | Workers Free          | Workers Paid              |
-| --------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | --------------------- | ------------------------- |
-| CPU to convert a ~5,000-word draft (`markdownToDraftDoc`) | about 2 to 3 ms (the workerd timer is coarse, treat as approximate)                            | 10 ms CPU per request | 30 s default, up to 5 min |
-| Subrequests per draft create/update                       | 1 draft POST + 1 `user-settings` (createDraft byline) + N `POST image`, one per external image | 50 per request        | 10,000 default, up to 10M |
-| 1 MB multipart image upload (`POST /api/v1/images`)       | 1 subrequest to Substack                                                                       | counts against 50     | counts against 10,000     |
-| Memory per isolate                                        | image bytes are base64-encoded in memory                                                       | 128 MB                | 128 MB                    |
+| Item                                                      | Measured or counted                                                                                          | Workers Free          | Workers Paid              |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | --------------------- | ------------------------- |
+| CPU to convert a ~5,000-word draft (`markdownToDraftDoc`) | about 2 to 3 ms (the workerd timer is coarse, treat as approximate)                                          | 10 ms CPU per request | 30 s default, up to 5 min |
+| Subrequests per draft write                               | createDraft: N `POST image` + 1 `user-settings` (byline) + 1 draft POST; updateDraft: N `POST image` + 1 PUT | 50 per request        | 10,000 default, up to 10M |
+| 1 MB multipart image upload (`POST /api/v1/images`)       | 1 subrequest to Substack                                                                                     | counts against 50     | counts against 10,000     |
+| Memory per isolate                                        | image bytes are base64-encoded in memory                                                                     | 128 MB                | 128 MB                    |
 
-So a draft with 12 external images makes 12 + 1 + 1 = 14 subrequests, which fits
+So creating a draft with 12 external images makes 12 + 1 + 1 = 14 subrequests (updating one makes 12 + 1 = 13), which fits
 the free plan's 50 but not far beyond it. The free plan's 10 ms CPU cap leaves
 little room above the converter's few ms plus parsing and JSON; large drafts may
 need Workers Paid. The maintainer's instance runs on Workers Paid.

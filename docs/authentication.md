@@ -67,11 +67,14 @@ Rules:
   entry (and rejected if it is not 64 hex characters). Pick keys that do not
   start with `sha256:`.
 
-Default `OWNER_ALLOWED_FEATURES`: every read (`*:get`, `*:list`, all stats),
-`drafts:create`, `drafts:update`, `drafts:prepublish`, `drafts:ai-detection`,
-`images` upload, and `health:ready`, each as `api:` and `mcp:` names. Notes
-creation, replies, comments, likes, deletes, scheduling and restacking are off
-unless you list them. The full list is in `src/auth/features.ts`.
+Default `OWNER_ALLOWED_FEATURES`: every read (`*:get`, `*:list`, all stats) and
+the safe draft writes (`drafts:create`, `drafts:update`, `drafts:prepublish`,
+`drafts:ai-detection`), each as `api:` and `mcp:` names, plus these exact names:
+`api:health:ready` (REST only; there is no MCP readiness tool),
+`api:images:create` and `mcp:images:upload`. Notes creation, replies, comments,
+likes, deletes, scheduling and restacking are off unless you list them. Setting
+`OWNER_ALLOWED_FEATURES` replaces the default list entirely, so spell out
+everything you want. The full list is in `src/auth/features.ts`.
 
 ## Credential shape
 

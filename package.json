@@ -9,6 +9,7 @@
     "dev": "wrangler dev",
     "test": "vitest run --project node",
     "test:workers": "vitest run --project workers",
+    "test:e2e": "vitest run --project e2e",
     "typecheck": "tsc --noEmit",
     "lint": "biome check .",
     "deploy": "wrangler deploy",

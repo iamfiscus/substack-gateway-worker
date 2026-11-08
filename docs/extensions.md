@@ -57,6 +57,17 @@ Read this before using it. An `authenticate` extension **replaces** the built-in
   (return an `AuthInfo` for them). Returning `null` gives them `401` even though
   they brought their own `x-gateway-token`.
 - If `authenticate` throws, the request fails with the generic misconfigured error.
+- Owner mode needs `GATEWAY_API_KEYS` set (plus the three `OWNER_*` secrets), even
+  though the key check is replaced. With an `authenticate` extension and
+  `GATEWAY_API_KEYS` unset, owner mode is off, so an extension that needs it
+  (such as `kvStatsCache`) fails every request. Set `GATEWAY_API_KEYS` to any
+  valid entry to keep owner mode on.
+
+## `ADMIN_TOKEN`
+
+`ADMIN_TOKEN` is a reserved secret name. The core Worker never reads it. It exists
+so an extension can protect its own admin routes (registered with `registerApp`)
+without inventing a new binding. If you add no such extension, leave it unset.
 
 ## Caches
 
