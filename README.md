@@ -41,8 +41,8 @@ notes, comments, likes, deletes, scheduling and restacking are off until you lis
 them. Prefix entries with `+` to add them to the default, for example
 `+api:notes:create,+mcp:notes:create`; a list without `+` replaces the default
 entirely. Mixing the two forms is rejected as a misconfiguration. See
-[Authentication](docs/authentication.md). The Worker never publishes or schedules anything on its own, and has no
-crons.
+[Authentication](docs/authentication.md). The Worker never publishes or
+schedules anything on its own, and has no crons.
 
 ## Getting your cookies
 
@@ -135,6 +135,11 @@ Changed behaviour:
   lose precision, and attribute keys that look like integers are ordered first.
 - Owner mode, the feature gate, hashed gateway keys and the optional KV caches are
   additions.
+- With a value cache installed (for example `kvValueCache`), the public profile
+  lookup behind the profile routes is fetched anonymously (empty cookies, as the
+  MCP profile tools do), so a cached profile never depends on one caller's
+  session and one caller's auth error is never served to another. Without a
+  cache the caller's credentials are used, as upstream does.
 
 ## Develop
 

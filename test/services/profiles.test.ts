@@ -98,3 +98,45 @@ it.each(['.', '..', ''])('slug %j is a 404 without calling Substack', async (slu
   await expect(getProfile(ctx, creds, { slug })).rejects.toMatchObject({ status: 404 });
   expect(fake.calls).toHaveLength(0);
 });
+
+it('with a value cache installed, fetches anonymously and shares one result across callers', async () => {
+  const store = new Map<string, Promise<unknown>>();
+  const cache: ValueCache = {
+    getOrCall: <T>(key: string, factory: () => Promise<T>) => {
+      if (!store.has(key)) store.set(key, factory());
+      return store.get(key) as Promise<T>;
+    },
+  };
+  const { ctx, fake } = ctxWith(cache, {
+    'GET substack.com/api/v1/user/jakubslys/public_profile': sample(
+      'user/jakubslys/public_profile',
+    ),
+  });
+  const alice = { publication_url: 'https://a.substack.com', substack_sid: 'A', connect_sid: 'a' };
+  const bob = { publication_url: 'https://b.substack.com', substack_sid: 'B', connect_sid: 'b' };
+  const one = await getProfile(ctx, alice, { slug: 'jakubslys' });
+  const two = await getProfile(ctx, bob, { slug: 'jakubslys' });
+  expect(two).toEqual(one);
+  expect(fake.calls).toHaveLength(1);
+  // Anonymous: the empty-cookie form the MCP profile tools send, never a caller's session.
+  const cookie = fake.calls[0]?.headers.get('cookie') ?? '';
+  expect(cookie).toBe('substack.sid=; connect.sid=');
+  expect(cookie).not.toMatch(/sid=[ABab]/);
+});
+
+it('with a value cache installed, a caller auth error is never what gets cached', async () => {
+  const { ctx, fake } = ctxWith(
+    { getOrCall: (_k, f) => f() },
+    { 'GET substack.com/api/v1/user/x/public_profile': { id: 1, name: 'X', handle: 'x' } },
+  );
+  await getProfile(ctx, { ...creds, substack_sid: 'expired' }, { slug: 'x' });
+  expect(fake.calls[0]?.headers.get('cookie')).not.toContain('expired');
+});
+
+it('with the NullValueCache, uses the caller credentials as upstream does', async () => {
+  const { ctx, fake } = ctxWith(new NullValueCache(), {
+    'GET substack.com/api/v1/user/x/public_profile': { id: 1, name: 'X', handle: 'x' },
+  });
+  await getProfile(ctx, creds, { slug: 'x' });
+  expect(fake.calls[0]?.headers.get('cookie')).toBe('substack.sid=s; connect.sid=c');
+});

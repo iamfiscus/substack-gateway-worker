@@ -3,7 +3,7 @@
 
 import type { BearerCredentials } from '../auth/credentials';
 import { SubstackAPIError } from '../clients/errors';
-import { type GatewayContext, makeClients } from '../context';
+import { anonymousCredentials, type GatewayContext, makeClients, NullValueCache } from '../context';
 import type { NotesPageResponse } from '../schemas/notes';
 import { parseSubstack } from '../schemas/parse';
 import type { PostsPageResponse } from '../schemas/posts';
@@ -14,6 +14,10 @@ import { getPostsForProfile } from './posts';
 /**
  * Resolve a slug to its public profile, through the installed cache. The key is
  * the slug alone, so a cached profile is shared across requests and callers.
+ * With a real cache installed the fetch is anonymous (empty cookies, as the MCP
+ * profile tools do), so the shared value never depends on one caller's session
+ * and one caller's auth error is never handed to another. With the default
+ * NullValueCache the caller's credentials are used, as upstream does.
  */
 export async function getProfileBySlug(
   ctx: GatewayContext,
@@ -24,7 +28,8 @@ export async function getProfileBySlug(
   if (slug === '' || slug === '.' || slug === '..') {
     throw new SubstackAPIError(404, 'Substack returned 404: HTTP 404');
   }
-  const { substack } = makeClients(ctx, creds);
+  const cached = !(ctx.valueCache instanceof NullValueCache);
+  const { substack } = makeClients(ctx, cached ? anonymousCredentials(ctx) : creds);
   return ctx.valueCache.getOrCall(`gateway_profiles:public_profile:${slug}`, async () => {
     // encodeURIComponent: a slug is one path segment, never a path or a query.
     const body = await substack.get(`user/${encodeURIComponent(slug)}/public_profile`);
