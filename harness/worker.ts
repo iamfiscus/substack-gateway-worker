@@ -4,10 +4,11 @@
 // needs only the Container API for running commands) and returns the parity
 // result `{ total, mismatches, allowed, happyFailures }` of harness/run.ts.
 //
-// Not deployed by default: deploying needs Jd's approval (Task 20, Step 1).
+// Not deployed by default: deploying it is optional and requires your own Cloudflare account.
 // Requests must carry `Authorization: Bearer <HARNESS_TOKEN>` (a Worker secret).
 
 import { DurableObject } from 'cloudflare:workers';
+import { bearerMatches } from './auth';
 
 type Env = {
   HARNESS: DurableObjectNamespace<HarnessSandbox>;
@@ -46,9 +47,8 @@ export class HarnessSandbox extends DurableObject<Env> {
   }
 }
 
-function authorized(req: Request, env: Env): boolean {
-  const token = env.HARNESS_TOKEN;
-  return Boolean(token) && req.headers.get('authorization') === `Bearer ${token}`;
+function authorized(req: Request, env: Env): Promise<boolean> {
+  return bearerMatches(req.headers.get('authorization'), env.HARNESS_TOKEN);
 }
 
 export default {
@@ -57,7 +57,8 @@ export default {
     if (url.pathname !== '/run' || req.method !== 'POST') {
       return Response.json({ detail: 'Not Found' }, { status: 404 });
     }
-    if (!authorized(req, env)) return Response.json({ detail: 'Unauthorized' }, { status: 401 });
+    if (!(await authorized(req, env)))
+      return Response.json({ detail: 'Unauthorized' }, { status: 401 });
     const { exitCode, stdout, stderr } = await env.HARNESS.getByName('parity').run();
     try {
       // A non-zero exit only means mismatches: the body says which.

@@ -1,6 +1,6 @@
 {
   // Private differential-parity harness Worker. NOT deployed by default:
-  // `npx wrangler deploy -c harness/wrangler.jsonc` needs Jd's approval (Task 20, Step 1).
+  // `npx wrangler deploy -c harness/wrangler.jsonc` is optional and requires your own Cloudflare account.
   // Set the bearer secret first: `npx wrangler secret put HARNESS_TOKEN -c harness/wrangler.jsonc`.
   "$schema": "../node_modules/wrangler/config-schema.json",
   "name": "substack-gateway-harness",

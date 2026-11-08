@@ -14,6 +14,7 @@ FAKE=http://127.0.0.1:7000
 cd "$ROOT"
 pids=()
 cleanup() {
+  [ -n "${EMPTY_ENV:-}" ] && rm -f "$EMPTY_ENV"
   for pid in "${pids[@]}"; do kill "$pid" 2>/dev/null || true; done
   wait 2>/dev/null || true
 }
@@ -29,7 +30,12 @@ pids+=($!)
 ) >"$LOGS/upstream.log" 2>&1 &
 pids+=($!)
 
-WRANGLER_SEND_METRICS=false npx wrangler dev --port 8787 --ip 127.0.0.1 \
+# Hermetic: an explicit (empty) --env-file makes wrangler skip any repo-root
+# .dev.vars, and CLOUDFLARE_INCLUDE_PROCESS_ENV=false keeps the shell's env out,
+# so local owner secrets never reach the harness Worker.
+EMPTY_ENV="$(mktemp)"
+WRANGLER_SEND_METRICS=false CLOUDFLARE_INCLUDE_PROCESS_ENV=false \
+  npx wrangler dev --port 8787 --ip 127.0.0.1 --env-file "$EMPTY_ENV" \
   --var "SUBSTACK_BASE_URL:$FAKE" --var LOG_LEVEL:error >"$LOGS/worker.log" 2>&1 &
 pids+=($!)
 

@@ -55,7 +55,11 @@ node harness/run.ts --only 'get_note' --show   # print both raw observations
 node harness/run.ts --only '^REST '            # diff a subset
 ```
 
-On Cloudflare (needs Jd's approval; it deploys to his account):
+`start.sh` runs `wrangler dev` hermetically: it passes an empty `--env-file`, so a
+repo-root `.dev.vars` (which may hold your owner cookies) is never loaded, and
+sets `CLOUDFLARE_INCLUDE_PROCESS_ENV=false` so shell variables stay out too.
+
+On Cloudflare (optional; deploying it requires your own Cloudflare account):
 
 ```sh
 npx wrangler secret put HARNESS_TOKEN -c harness/wrangler.jsonc
