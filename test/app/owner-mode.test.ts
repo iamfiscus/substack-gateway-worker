@@ -294,6 +294,18 @@ describe('request id', () => {
     }
   });
 
+  it('replaces an over-long or unsafe X-Request-ID with a UUID', async () => {
+    const { request } = setup();
+    const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+    for (const bad of ['a'.repeat(129), 'has space', 'semi;colon', 'new\u00e9', '<x>']) {
+      const res = await request('/api/v1/health/live', { headers: { 'X-Request-ID': bad } });
+      expect(res.headers.get('X-Request-ID'), bad).toMatch(uuid);
+    }
+    const ok = 'A-z_0.9'.padEnd(128, 'x');
+    const res = await request('/api/v1/health/live', { headers: { 'X-Request-ID': ok } });
+    expect(res.headers.get('X-Request-ID')).toBe(ok);
+  });
+
   it('propagates the request id to Substack', async () => {
     const { request, fake } = setup();
     await request('/api/v1/me', { headers: { ...KEY, 'X-Request-ID': 'rid-1' } });

@@ -121,7 +121,7 @@ in this reference is authenticated in the sense above.
   release.
 - `upload_image(image_base64, token=None, content_type="image/png")` —
   upload a base64-encoded image to Substack and return its hosted URL and
-  dimensions.
+  dimensions. More than 10 MB decoded is a tool error (a port addition).
 
 ### Draft bodies
 

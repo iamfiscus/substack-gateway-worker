@@ -25,7 +25,12 @@ import {
   unscheduleDraft,
   updateDraft,
 } from '../../src/services/drafts';
-import { dataUri } from '../../src/services/images';
+import {
+  dataUri,
+  decodeImageBase64,
+  IMAGE_TOO_LARGE,
+  MAX_IMAGE_BYTES,
+} from '../../src/services/images';
 import { createWorld, encodeCredentials, send, type World } from '../bdd/steps/common';
 import { callTool, mcpRequest } from '../bdd/steps/mcp';
 import { createFakeSubstack } from '../support/fakeSubstack';
@@ -485,6 +490,61 @@ describe('test_images_endpoint', () => {
     });
   });
 
+  it('a file over 10 MB is a 413 and nothing is uploaded', async () => {
+    const w = restWorld();
+    w.routes[`POST ${PUB}/image`] = IMAGE_RESPONSE;
+    const form = new FormData();
+    form.append('file', new File([new Uint8Array(10 * 1024 * 1024 + 1)], 'big.png'));
+    await upload(w, form);
+    expect(w.response?.status).toBe(413);
+    expect(JSON.parse(w.bodyText ?? '')).toEqual({ detail: 'Image too large (max 10 MB)' });
+    expect(w.fake?.calls).toHaveLength(0);
+  });
+
+  it('a file of exactly 10 MB is accepted', async () => {
+    const w = restWorld();
+    w.routes[`POST ${PUB}/image`] = IMAGE_RESPONSE;
+    const form = new FormData();
+    form.append('file', new File([new Uint8Array(10 * 1024 * 1024)], 'max.png'));
+    await upload(w, form);
+    expect(w.response?.status, w.bodyText).toBe(201);
+  });
+
+  it('an over-large Content-Length is a 413 before the body is read', async () => {
+    const { createApp } = await import('../../src/app');
+    const w = restWorld();
+    const fake = createFakeSubstack(w.routes);
+    const app = createApp({ fetcher: fake });
+    let pulled = false;
+    const body = new ReadableStream(
+      {
+        pull(controller) {
+          pulled = true;
+          controller.close();
+        },
+      },
+      { highWaterMark: 0 },
+    );
+    const res = await app.request(
+      '/api/v1/images',
+      {
+        method: 'POST',
+        headers: {
+          ...w.headers,
+          'content-type': 'multipart/form-data; boundary=x',
+          'content-length': String(50 * 1024 * 1024),
+        },
+        body,
+        duplex: 'half',
+      } as RequestInit,
+      w.env,
+    );
+    expect(res.status).toBe(413);
+    expect(await res.json()).toEqual({ detail: 'Image too large (max 10 MB)' });
+    expect(pulled).toBe(false);
+    expect(fake.calls).toHaveLength(0);
+  });
+
   it('a missing file is a 422 and nothing is uploaded', async () => {
     const w = restWorld();
     const form = new FormData();
@@ -515,6 +575,30 @@ describe('test_mcp_upload_image', () => {
     expect(out.result?.url).toBe('https://substack-post-media.s3.amazonaws.com/x.png');
     expect(out.result?.width).toBe(10);
     expect(out.result?.content_type).toBe('image/png');
+  });
+});
+
+describe('upload_image size cap', () => {
+  it('decodeImageBase64 rejects decoded bytes over 10 MB', () => {
+    // "AAAA" decodes to 3 zero bytes.
+    const over = 'AAAA'.repeat(Math.floor(MAX_IMAGE_BYTES / 3) + 1);
+    expect(() => decodeImageBase64(over)).toThrow(IMAGE_TOO_LARGE);
+    const atCap = 'AAAA'.repeat(Math.floor(MAX_IMAGE_BYTES / 3));
+    expect(decodeImageBase64(atCap).length).toBeLessThanOrEqual(MAX_IMAGE_BYTES);
+    expect(decodeImageBase64('QUJD\n')).toEqual(new TextEncoder().encode('ABC'));
+  });
+
+  it('an oversized upload_image call is refused before reaching Substack', async () => {
+    // The MCP transport caps a request body at 4 MB, below the 10 MB image cap.
+    const w = mcpWorld();
+    w.routes[`POST ${PUB}/image`] = IMAGE_RESPONSE;
+    const b64 = 'AAAA'.repeat(Math.floor(MAX_IMAGE_BYTES / 3) + 1);
+    const { res } = await mcpRequest(w, 'tools/call', {
+      name: 'upload_image',
+      arguments: { image_base64: b64, token: w.mcpToken },
+    });
+    expect(res.status).toBe(413);
+    expect(w.fake?.calls ?? []).toHaveLength(0);
   });
 });
 

@@ -226,7 +226,8 @@ Cancels a draft's scheduled release. Returns `204 No Content`.
 ### `POST /api/v1/images`
 
 Uploads an image file (multipart `file`) to Substack and returns its hosted
-URL and dimensions. Returns `201 Created`.
+URL and dimensions. Returns `201 Created`. Files over 10 MB are refused with
+`413 {"detail":"Image too large (max 10 MB)"}` (a port addition).
 
 ## Stats (8)
 

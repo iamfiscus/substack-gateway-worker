@@ -135,6 +135,17 @@ Changed behaviour:
   lose precision, and attribute keys that look like integers are ordered first.
 - Owner mode, the feature gate, hashed gateway keys and the optional KV caches are
   additions.
+- `POST /api/v1/images` and the `upload_image` MCP tool refuse images over
+  10 MB (`413 {"detail":"Image too large (max 10 MB)"}` on REST, checked from
+  `Content-Length` before the body is read and again on the file size; a tool
+  error on MCP, whose transport already caps a request at 4 MB). Upstream has
+  no cap.
+- An incoming `X-Request-ID` is reused only if it is at most 128 characters of
+  `[A-Za-z0-9._-]`; anything else gets a fresh UUID.
+- `scheduled_at` given as a numeric string (`"1767225600"`) is a `422`; pydantic
+  accepts it as a unix timestamp. Send a JSON number or an ISO-8601 string.
+- A Substack user-settings entry without a `type` is accepted (only `user_id` is
+  read); upstream's model requires `type` and answers `500`.
 - With a value cache installed (for example `kvValueCache`), the public profile
   lookup behind the profile routes is fetched anonymously (empty cookies, as the
   MCP profile tools do), so a cached profile never depends on one caller's

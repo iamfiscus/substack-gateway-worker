@@ -1,6 +1,8 @@
 // Routes of gateway_drafts_rest/router.py (upstream bc2e875).
 
 import { createRoute, z } from '@hono/zod-openapi';
+import type { MiddlewareHandler } from 'hono';
+import type { AppEnv } from '../context';
 import { DraftMarkdownError } from '../converters/dialect/errors';
 import { InvalidCursorError } from '../drafts/cursor';
 import {
@@ -38,7 +40,7 @@ import {
   updateDraft,
   uploadImage,
 } from '../services/drafts';
-import { dataUri } from '../services/images';
+import { dataUri, IMAGE_TOO_LARGE, MAX_IMAGE_BYTES } from '../services/images';
 import { restRoute } from './credentials';
 import { createRouter, HttpError } from './errors';
 import { jsonBody, noContent, ok, tokenHeader } from './openapi';
@@ -160,9 +162,22 @@ const ImageUploadForm = z.object({
     .openapi({ type: 'string', format: 'binary' }),
 });
 
+/** Room for the multipart boundaries and part headers around a maximum-size file. */
+const MULTIPART_OVERHEAD = 64 * 1024;
+
+/** Reject an oversized upload from its Content-Length, before the body is read. */
+const imageSizeGuard: MiddlewareHandler<AppEnv> = async (c, next) => {
+  const length = Number(c.req.header('content-length'));
+  if (Number.isFinite(length) && length > MAX_IMAGE_BYTES + MULTIPART_OVERHEAD) {
+    return c.json({ detail: IMAGE_TOO_LARGE }, 413);
+  }
+  await next();
+};
+
 const imagesRoute = createRoute({
   method: 'post',
   path: '/images',
+  middleware: [imageSizeGuard] as const,
   tags: ['drafts', 'images'],
   summary: 'Upload Image',
   description: 'Upload an image file to Substack and return its hosted URL and dimensions.',
@@ -277,6 +292,7 @@ export const draftsRouter = createRouter()
     imagesRoute,
     restRoute<typeof imagesRoute>('api:images:create', async (c, { creds, ctx }) => {
       const { file } = c.req.valid('form');
+      if (file.size > MAX_IMAGE_BYTES) throw new HttpError(413, IMAGE_TOO_LARGE);
       const raw = new Uint8Array(await file.arrayBuffer());
       const contentType = file.type || 'application/octet-stream';
       const image = await uploadImage(ctx, creds, { image: dataUri(contentType, raw) });

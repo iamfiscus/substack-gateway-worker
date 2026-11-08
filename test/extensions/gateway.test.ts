@@ -169,6 +169,30 @@ describe('createGateway', () => {
     expect(fake.calls[0]?.headers.get('cookie')).toBe('substack.sid=es; connect.sid=ec');
   });
 
+  it('logs a throwing extension authenticate as such, answering a generic 500', async () => {
+    const lines: string[] = [];
+    vi.spyOn(console, 'log').mockImplementation((l: string) => lines.push(l));
+    const gw = createGateway({
+      fetcher: createFakeSubstack({}),
+      extensions: [
+        {
+          name: 'auth',
+          authenticate: async () => {
+            throw new Error('boom-detail');
+          },
+        },
+      ],
+    });
+    const res = await gw.fetch(new Request('https://w/api/v1/me'), TEST_ENV);
+    expect(res.status).toBe(500);
+    expect(await res.json()).toEqual({ detail: 'gateway misconfigured' });
+    const log = lines.join('\n');
+    expect(log).toContain('extension authenticate failed');
+    expect(log).not.toContain('GATEWAY_API_KEYS is malformed');
+    expect(log).not.toContain('boom-detail');
+    vi.restoreAllMocks();
+  });
+
   it('runs registerApi, registerApp and registerMcp', async () => {
     const calls: string[] = [];
     const ext: GatewayExtension = {

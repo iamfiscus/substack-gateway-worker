@@ -1,5 +1,6 @@
 // Port of gateway_drafts/image.py (upstream bc2e875).
 
+import { lenientBase64ToBytes } from '../auth/credentials';
 import { SubstackAPIError } from '../clients/errors';
 import type { PublicationClient } from '../clients/publication';
 
@@ -11,6 +12,17 @@ export type UploadedImage = {
   bytes: number;
   contentType: string;
 };
+
+/** Upload cap, checked before an image is base64-encoded for Substack (upstream has none). */
+export const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+export const IMAGE_TOO_LARGE = 'Image too large (max 10 MB)';
+
+/** Decode an MCP `image_base64` argument, refusing more than MAX_IMAGE_BYTES. */
+export function decodeImageBase64(b64: string): Uint8Array {
+  const bytes = lenientBase64ToBytes(b64);
+  if (bytes.length > MAX_IMAGE_BYTES) throw new Error(IMAGE_TOO_LARGE);
+  return bytes;
+}
 
 /** Build a `data:<mime>;base64,<...>` URI for Substack's image field. */
 export function dataUri(contentType: string, bytes: Uint8Array): string {

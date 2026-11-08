@@ -40,6 +40,13 @@ const SILENT_PATHS = new Set(['/api/v1/health/live', '/api/v1/health/ready']);
 
 const INVALID_GATEWAY_KEY = 'Invalid gateway key';
 
+/** An incoming X-Request-ID is reused only when short and log-safe. */
+const SAFE_REQUEST_ID = /^[A-Za-z0-9._-]{1,128}$/;
+
+function requestIdFrom(incoming: string | undefined): string {
+  return incoming !== undefined && SAFE_REQUEST_ID.test(incoming) ? incoming : crypto.randomUUID();
+}
+
 function ownerResolver(env: GatewayEnv): CredentialResolver | null {
   const any = env.OWNER_PUBLICATION_URL || env.OWNER_SUBSTACK_SID || env.OWNER_CONNECT_SID;
   return any ? new SecretCredentialResolver(env) : null;
@@ -48,7 +55,7 @@ function ownerResolver(env: GatewayEnv): CredentialResolver | null {
 type KeyCheck =
   | { kind: 'off' }
   | { kind: 'ok'; auth: AuthInfo }
-  | { kind: 'denied' | 'misconfigured' };
+  | { kind: 'denied' | 'misconfigured' | 'extensionFailed' };
 
 async function checkGatewayKey(
   req: Request,
@@ -61,7 +68,7 @@ async function checkGatewayKey(
       const auth = await authenticate(req, env);
       return auth ? { kind: 'ok', auth } : { kind: 'denied' };
     } catch {
-      return { kind: 'misconfigured' };
+      return { kind: 'extensionFailed' };
     }
   }
   const raw = env.GATEWAY_API_KEYS;
@@ -115,7 +122,7 @@ export function createApp(opts: CreateAppOptions = {}): Hono<AppEnv> {
     assertOwnerModeFor(providers, env);
     const config = loadConfig(env);
     const log = createLogger(config.logLevel);
-    const requestId = c.req.header('x-request-id') || crypto.randomUUID();
+    const requestId = requestIdFrom(c.req.header('x-request-id'));
     const path = c.req.path;
     let allowed: ReadonlySet<string>;
     let featuresMalformed = false;
@@ -164,8 +171,12 @@ export function createApp(opts: CreateAppOptions = {}): Hono<AppEnv> {
         log.error('OWNER_ALLOWED_FEATURES is malformed', { request_id: requestId });
         return finish(c.json({ detail: GATEWAY_MISCONFIGURED }, 500));
       }
-      if (key.kind === 'misconfigured') {
-        log.error('GATEWAY_API_KEYS is malformed', { request_id: requestId });
+      if (key.kind === 'misconfigured' || key.kind === 'extensionFailed') {
+        const msg =
+          key.kind === 'misconfigured'
+            ? 'GATEWAY_API_KEYS is malformed'
+            : 'extension authenticate failed';
+        log.error(msg, { request_id: requestId });
         return finish(c.json({ detail: GATEWAY_MISCONFIGURED }, 500));
       }
       if (key.kind === 'denied') return finish(c.json({ detail: INVALID_GATEWAY_KEY }, 401));

@@ -2,7 +2,6 @@
 
 import type { McpServer } from '@modelcontextprotocol/server';
 import { z } from 'zod';
-import { lenientBase64ToBytes } from '../auth/credentials';
 import type { GatewayContext } from '../context';
 import {
   aiDetectionResponse,
@@ -27,7 +26,7 @@ import {
   updateDraft,
   uploadImage,
 } from '../services/drafts';
-import { dataUri } from '../services/images';
+import { dataUri, decodeImageBase64 } from '../services/images';
 import { mcpTool, readAnnotations, TOKEN_NOTE, toolMeta, writeAnnotations } from './server';
 
 // Compact cheat sheet for the body dialect; the full reference is
@@ -117,7 +116,7 @@ export function registerDraftsTools(server: McpServer, _ctx: GatewayContext): vo
       meta: toolMeta('drafts', 'POST /api/v1/image', ['drafts', 'images', 'write']),
     },
     async (args, creds, ctx) => {
-      const image = dataUri(args.content_type, lenientBase64ToBytes(args.image_base64));
+      const image = dataUri(args.content_type, decodeImageBase64(args.image_base64));
       return imageUploadResult(await uploadImage(ctx, creds, { image }));
     },
   );
