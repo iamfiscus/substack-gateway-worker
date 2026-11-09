@@ -88,10 +88,18 @@ const MALFORMED_JSON = 'Malformed JSON in request body';
 const UNSUPPORTED_MEDIA_TYPE = 'Unsupported Media Type';
 const NOT_A_DICT = 'Input should be a valid dictionary or object to extract fields from';
 
-/** Methods whose raw body is buffered so a body error can be reported like upstream. */
-export const BODY_METHODS = new Set(['POST', 'PUT', 'PATCH']);
+/** Largest non-JSON body read (after the error) to echo as `input`. */
+const ECHO_CAP = 64 * 1024;
 
-/** The buffered raw request body, or null when it was never buffered. */
+function declaredLength(header: string | undefined): number | null {
+  const v = header?.trim() ?? '';
+  return /^\d+$/.test(v) ? Number(v) : null;
+}
+
+/**
+ * The raw JSON body text. Hono's `c.req.json()` reads through its text cache, so after
+ * the JSON validator has run the text is already in memory; nothing extra is buffered.
+ */
 async function bufferedText(c: Context): Promise<string | null> {
   const cached = c.req.bodyCache.text;
   if (cached === undefined) return null;
@@ -102,28 +110,49 @@ async function bufferedText(c: Context): Promise<string | null> {
   }
 }
 
+/** Read an unread body of declared length <= ECHO_CAP; null otherwise (never unbounded). */
+async function smallUnreadText(c: Context): Promise<string | null> {
+  const n = declaredLength(c.req.header('content-length'));
+  if (n === null || n > ECHO_CAP || c.req.raw.bodyUsed) return null;
+  try {
+    const text = await c.req.raw.text();
+    return text.length <= ECHO_CAP ? text : null;
+  } catch {
+    return null;
+  }
+}
+
+const missingBody = (c: Context) =>
+  c.json({ detail: [{ type: 'missing', loc: ['body'], msg: 'Field required', input: null }] }, 422);
+
 /**
  * Map the JSON body validator's HTTPExceptions to upstream's FastAPI 422 bodies
  * (observed against bc2e875): empty body -> missing, unparsable JSON ->
  * json_invalid with the error position, a non-JSON media type -> the
- * model_attributes_type error echoing the input. Null when `err` is not one of them.
+ * model_attributes_type error echoing the input (only when it is at most 64 KiB
+ * with a declared Content-Length; it is read after the error, never unbounded).
+ * Null when `err` is not one of these.
  */
 export async function bodyErrorResponse(c: Context, err: unknown): Promise<Response | null> {
   if (!(err instanceof HTTPException)) return null;
-  const malformed = err.status === 400 && err.message === MALFORMED_JSON;
-  const mediaType = err.status === 415 && err.message === UNSUPPORTED_MEDIA_TYPE;
-  if (!malformed && !mediaType) return null;
-  const raw = await bufferedText(c);
-  if (raw === null) return null;
-  if (raw === '') {
-    return c.json(
-      { detail: [{ type: 'missing', loc: ['body'], msg: 'Field required', input: null }] },
-      422,
-    );
+  if (err.status === 415 && err.message === UNSUPPORTED_MEDIA_TYPE) {
+    if (declaredLength(c.req.header('content-length')) === 0) return missingBody(c);
+    const raw = await smallUnreadText(c);
+    if (raw === '') return missingBody(c);
+    const issue: Record<string, unknown> = {
+      type: 'model_attributes_type',
+      loc: ['body'],
+      msg: NOT_A_DICT,
+    };
+    if (raw !== null) issue.input = raw;
+    return c.json({ detail: [issue] }, 422);
   }
-  if (mediaType) {
+  if (err.status !== 400 || err.message !== MALFORMED_JSON) return null;
+  const raw = await bufferedText(c);
+  if (raw === '') return missingBody(c);
+  if (raw === null) {
     return c.json(
-      { detail: [{ type: 'model_attributes_type', loc: ['body'], msg: NOT_A_DICT, input: raw }] },
+      { detail: [{ type: 'json_invalid', loc: ['body'], msg: 'JSON decode error', input: {} }] },
       422,
     );
   }

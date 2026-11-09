@@ -11,11 +11,18 @@ const TOKEN = encodeCredentials({
   connect_sid: 'c',
 });
 
-async function send(method: string, path: string, body: string, contentType?: string) {
+async function send(
+  method: string,
+  path: string,
+  body: string,
+  contentType?: string,
+  length?: number | null,
+) {
   const fake = createFakeSubstack({});
   const app = createApp({ fetcher: fake });
   const headers: Record<string, string> = { 'x-gateway-token': TOKEN };
   if (contentType) headers['content-type'] = contentType;
+  if (length !== null) headers['content-length'] = String(length ?? Buffer.byteLength(body));
   const res = await app.request(path, { method, headers, body }, TEST_ENV);
   return { status: res.status, json: (await res.json()) as { detail: unknown }, calls: fake.calls };
 }
@@ -63,5 +70,32 @@ describe.each(ROUTES)('%s %s with a bad body', (method, path) => {
       },
     ]);
     expect(r.calls).toHaveLength(0);
+  });
+});
+
+describe('body reads stay bounded', () => {
+  it('a non-multipart upload to /images still meets the size guard first (411/413)', async () => {
+    const big = 'x'.repeat(2048);
+    const noLength = await send('POST', '/api/v1/images', big, 'application/json', null);
+    expect(noLength.status).toBe(411);
+    const tooBig = await send('POST', '/api/v1/images', big, 'text/plain', 50 * 1024 * 1024);
+    expect(tooBig.status).toBe(413);
+  });
+
+  it('a JSON-typed upload to /images meets the size guard before any body read', async () => {
+    const r = await send('POST', '/api/v1/images', '{', 'application/json', 50 * 1024 * 1024);
+    expect(r.status).toBe(413);
+  });
+
+  it('a non-JSON body over 64 KiB is a 422 without echoing the input', async () => {
+    const r = await send('POST', '/api/v1/notes', 'y'.repeat(70 * 1024), 'text/plain');
+    expect(r.status).toBe(422);
+    expect(r.json.detail).toEqual([
+      {
+        type: 'model_attributes_type',
+        loc: ['body'],
+        msg: 'Input should be a valid dictionary or object to extract fields from',
+      },
+    ]);
   });
 });

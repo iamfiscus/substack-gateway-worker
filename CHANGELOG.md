@@ -7,6 +7,9 @@
   (`missing`, `json_invalid` with the error position, `model_attributes_type`). Found while
   editing a draft live; the harness only ever sent `{}`. 9 new harness cases (528 total,
   0 mismatches locally).
+  No extra buffering: Hono's validator already holds the JSON text; a non-JSON body is
+  echoed only when it is at most 64 KiB with a declared Content-Length, read after the
+  error. The image upload's size guard still runs before any body read.
 - Parity harness ran on Cloudflare Sandbox: 519 cases, 0 mismatches (66 allowed
   differences). Receipt with every attempt, failures included:
   `evidence/2026-11-08-explained-dry-run/`.
