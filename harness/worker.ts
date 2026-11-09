@@ -24,12 +24,15 @@ export class HarnessSandbox extends DurableObject<Env> {
     // The image's own command runs the harness once and exits; under the
     // Durable Object the container idles and each /run execs the harness.
     // Everything the harness needs is in the image, and it only talks to 127.0.0.1.
-    if (!container.running) {
-      container.start({ entrypoint: ['sleep', 'infinity'], enableInternet: false });
-    }
     let lastError: unknown;
-    for (let attempt = 0; attempt < 30; attempt++) {
+    // Right after a deploy the container application can still be
+    // provisioning ("no container instance that can be provided"), and a failed
+    // start leaves the container stopped, so (re)start it on every attempt.
+    for (let attempt = 0; attempt < 90; attempt++) {
       try {
+        if (!container.running) {
+          container.start({ entrypoint: ['sleep', 'infinity'], enableInternet: false });
+        }
         const proc = await container.exec(['harness/start.sh'], { cwd: '/app' });
         const out = await proc.output();
         return {
@@ -59,7 +62,16 @@ export default {
     }
     if (!(await authorized(req, env)))
       return Response.json({ detail: 'Unauthorized' }, { status: 401 });
-    const { exitCode, stdout, stderr } = await env.HARNESS.getByName('parity').run();
+    let result: { exitCode: number; stdout: string; stderr: string };
+    try {
+      result = await env.HARNESS.getByName('parity').run();
+    } catch (err) {
+      return Response.json(
+        { detail: 'harness container did not run', error: String(err) },
+        { status: 503 },
+      );
+    }
+    const { exitCode, stdout, stderr } = result;
     try {
       // A non-zero exit only means mismatches: the body says which.
       return Response.json(JSON.parse(stdout));

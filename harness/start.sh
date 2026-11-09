@@ -23,10 +23,12 @@ trap cleanup EXIT
 node harness/fakeSubstackServer.ts >"$LOGS/fake.log" 2>&1 &
 pids+=($!)
 
+# --no-sync: the image's venv is already synced, and the Sandbox container has
+# no internet, so a re-sync (rebuilding workspace packages from PyPI) fails.
 (
   cd upstream
   SUBSTACK_GATEWAY_SUBSTACK_BASE_URL="$FAKE" SUBSTACK_GATEWAY_LOG_LEVEL=WARNING \
-    HOST=127.0.0.1 PORT=5001 exec uv run --frozen python -m substack_gateway.main
+    HOST=127.0.0.1 PORT=5001 exec uv run --frozen --no-sync python -m substack_gateway.main
 ) >"$LOGS/upstream.log" 2>&1 &
 pids+=($!)
 
