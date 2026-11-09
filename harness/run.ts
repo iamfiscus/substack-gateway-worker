@@ -54,6 +54,9 @@ function buildRequest(c: MatrixCase, id: number): RequestInit {
       else fd.append(k, new Blob([Buffer.from(v.content, 'latin1')], { type: v.type }), v.filename);
     }
     init.body = fd;
+  } else if (c.rawBody) {
+    headers['content-type'] = c.rawBody.contentType;
+    init.body = c.rawBody.content;
   } else if (c.body !== undefined) {
     headers['content-type'] = 'application/json';
     init.body = JSON.stringify(c.body);

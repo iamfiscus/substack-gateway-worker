@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Fix: an empty, malformed or non-JSON request body on a JSON route (notes, drafts,
+  comments, schedule, ...) answered `500`; it now answers upstream's `422` bodies
+  (`missing`, `json_invalid` with the error position, `model_attributes_type`). Found while
+  editing a draft live; the harness only ever sent `{}`. 9 new harness cases (528 total,
+  0 mismatches locally).
 - Parity harness ran on Cloudflare Sandbox: 519 cases, 0 mismatches (66 allowed
   differences). Receipt with every attempt, failures included:
   `evidence/2026-11-08-explained-dry-run/`.

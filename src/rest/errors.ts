@@ -3,6 +3,7 @@
 
 import { OpenAPIHono, type z } from '@hono/zod-openapi';
 import type { Context } from 'hono';
+import { HTTPException } from 'hono/http-exception';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
 import { InvalidTokenError, MissingCredentialsError } from '../auth/credentials';
 import { FeatureDisabledError } from '../auth/features';
@@ -81,4 +82,70 @@ export function createRouter(): OpenAPIHono<AppEnv> {
       }
     },
   });
+}
+
+const MALFORMED_JSON = 'Malformed JSON in request body';
+const UNSUPPORTED_MEDIA_TYPE = 'Unsupported Media Type';
+const NOT_A_DICT = 'Input should be a valid dictionary or object to extract fields from';
+
+/** Methods whose raw body is buffered so a body error can be reported like upstream. */
+export const BODY_METHODS = new Set(['POST', 'PUT', 'PATCH']);
+
+/** The buffered raw request body, or null when it was never buffered. */
+async function bufferedText(c: Context): Promise<string | null> {
+  const cached = c.req.bodyCache.text;
+  if (cached === undefined) return null;
+  try {
+    return await cached;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Map the JSON body validator's HTTPExceptions to upstream's FastAPI 422 bodies
+ * (observed against bc2e875): empty body -> missing, unparsable JSON ->
+ * json_invalid with the error position, a non-JSON media type -> the
+ * model_attributes_type error echoing the input. Null when `err` is not one of them.
+ */
+export async function bodyErrorResponse(c: Context, err: unknown): Promise<Response | null> {
+  if (!(err instanceof HTTPException)) return null;
+  const malformed = err.status === 400 && err.message === MALFORMED_JSON;
+  const mediaType = err.status === 415 && err.message === UNSUPPORTED_MEDIA_TYPE;
+  if (!malformed && !mediaType) return null;
+  const raw = await bufferedText(c);
+  if (raw === null) return null;
+  if (raw === '') {
+    return c.json(
+      { detail: [{ type: 'missing', loc: ['body'], msg: 'Field required', input: null }] },
+      422,
+    );
+  }
+  if (mediaType) {
+    return c.json(
+      { detail: [{ type: 'model_attributes_type', loc: ['body'], msg: NOT_A_DICT, input: raw }] },
+      422,
+    );
+  }
+  let message = 'JSON decode error';
+  try {
+    JSON.parse(raw);
+  } catch (e) {
+    if (e instanceof Error) message = e.message;
+  }
+  const pos = /position (\d+)/.exec(message);
+  return c.json(
+    {
+      detail: [
+        {
+          type: 'json_invalid',
+          loc: ['body', pos ? Number(pos[1]) : 0],
+          msg: 'JSON decode error',
+          input: {},
+          ctx: { error: message },
+        },
+      ],
+    },
+    422,
+  );
 }

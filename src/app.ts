@@ -18,7 +18,12 @@ import { createLogger } from './log';
 import { handleMcpRequest } from './mcp/server';
 import { commentsRouter } from './rest/comments';
 import { draftsRouter } from './rest/drafts';
-import { errorResponse, GATEWAY_MISCONFIGURED } from './rest/errors';
+import {
+  BODY_METHODS,
+  bodyErrorResponse,
+  errorResponse,
+  GATEWAY_MISCONFIGURED,
+} from './rest/errors';
 import { followingRouter } from './rest/following';
 import { healthRouter } from './rest/health';
 import { meRouter } from './rest/me';
@@ -93,6 +98,13 @@ export function createApi(extensions: readonly GatewayExtension[] = []): OpenAPI
     if (c.res.status === 204 && !c.res.headers.has('content-type')) {
       c.res.headers.set('content-type', 'application/json');
     }
+  });
+  // Buffer write bodies as text (multipart excluded: image bytes stay untouched) so a
+  // body the JSON validator rejects can still be reported the way upstream does.
+  api.use('*', async (c, next) => {
+    const type = c.req.header('content-type') ?? '';
+    if (BODY_METHODS.has(c.req.method) && !/^multipart\//i.test(type)) await c.req.text();
+    await next();
   });
   api.route('/v1', healthRouter);
   api.route('/v1', meRouter);
@@ -222,7 +234,9 @@ export function createApp(opts: CreateAppOptions = {}): Hono<AppEnv> {
   );
 
   app.notFound((c) => c.json({ detail: 'Not Found' }, 404));
-  app.onError((err, c) => {
+  app.onError(async (err, c) => {
+    const bodyError = await bodyErrorResponse(c, err);
+    if (bodyError) return bodyError;
     c.var.gw?.log.error('unhandled error', { request_id: c.var.gw.requestId });
     return errorResponse(c, err);
   });

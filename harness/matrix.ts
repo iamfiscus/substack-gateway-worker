@@ -15,6 +15,8 @@ export type MatrixCase = {
   headers?: Record<string, string>;
   /** JSON request body. */
   body?: unknown;
+  /** A raw request body sent as-is with its own content type (empty, malformed, non-JSON). */
+  rawBody?: { content: string; contentType: string };
   /** Multipart form fields (a `Blob` value becomes a file part). */
   form?: Record<string, { content: string; type: string; filename: string } | string>;
   /** A JSON-RPC `tools/call` (sent as POST `path`, usually /mcp). */
@@ -410,6 +412,27 @@ const EXTRA: MatrixCase[] = [
     path: '/api/v1/posts/abc',
     headers: token,
   },
+  ...(
+    [
+      ['POST', '/api/v1/notes'],
+      ['POST', '/api/v1/drafts'],
+      ['PUT', '/api/v1/drafts/1'],
+    ] as const
+  ).flatMap(([method, path]) =>
+    (
+      [
+        ['zero-byte JSON body', '', 'application/json'],
+        ['malformed JSON body', '{', 'application/json'],
+        ['non-JSON content type', 'x', 'application/x-www-form-urlencoded'],
+      ] as const
+    ).map(([what, content, contentType]) => ({
+      name: `REST ${method} ${path} ${what} (422)`,
+      method,
+      path,
+      headers: token,
+      rawBody: { content, contentType },
+    })),
+  ),
   {
     name: 'REST POST /api/v1/notes empty body (422)',
     method: 'POST',
