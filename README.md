@@ -16,7 +16,7 @@ It exposes 51 REST endpoints under `/api/v1` (OpenAPI at `/api/openapi.json`,
 Swagger UI at `/api/docs`) and 49 MCP tools at `/mcp`. See
 [API reference](docs/api-reference.md), [MCP](docs/mcp.md),
 [Authentication](docs/authentication.md), [Draft Markdown](docs/drafts-markdown.md),
-[Extensions](docs/extensions.md) and [Deploy](docs/deploy.md).
+[Extensions](docs/extensions.md) and [Deploy](docs/deploy.md). Read [Known issues](docs/known-issues.md) before deploying: Substack rate-limits Workers egress.
 
 ## Credential modes
 

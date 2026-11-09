@@ -39,11 +39,24 @@ describe.skipIf(!enabled)('e2e: read endpoints', () => {
     expect(r.json()).toHaveProperty('name');
   });
 
-  it.each(['notes', 'posts', 'following'])('lists own %s', async (what) => {
-    const r = await get(`/api/v1/me/${what}`);
+  it('lists own posts', async () => {
+    const r = await get('/api/v1/me/posts');
     expectStatus(r, 200);
     expect(Array.isArray(r.json().items)).toBe(true);
   });
+
+  // Known upstream drift (docs/known-issues.md): as of 2026-11-08 Substack answers
+  // GET {pub}/api/v1/notes with 404 and /user/{id}/subscriber-lists with 403, for
+  // upstream bc2e875 and this port alike. Kept faithful to upstream; skipped so a
+  // live run stays meaningful. Re-enable with E2E_INCLUDE_UPSTREAM_DRIFT=1.
+  it.skipIf(!process.env.E2E_INCLUDE_UPSTREAM_DRIFT).each(['notes', 'following'])(
+    'lists own %s (known upstream drift)',
+    async (what) => {
+      const r = await get(`/api/v1/me/${what}`);
+      expectStatus(r, 200);
+      expect(Array.isArray(r.json().items)).toBe(true);
+    },
+  );
 
   describe.skipIf(!PROFILE_SLUG)('profiles (E2E_PROFILE_SLUG)', () => {
     it('gets profile by slug', async () => {

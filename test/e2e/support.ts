@@ -6,6 +6,8 @@
 //
 // Optional fixtures (scenarios that need one skip when it is unset):
 //   E2E_PROFILE_SLUG, E2E_POST_ID, E2E_NOTE_ID
+//   (E2E_POST_ID must be a post on the credentials' own publication: post comments
+//   are read from the publication host, so another publication's post answers 404.)
 // Optional switches:
 //   E2E_ALLOW_WRITES=<host> opt in to scenarios that write to Substack (default: reads
 //                         only). Must equal the exact host of E2E_BASE_URL, e.g.
