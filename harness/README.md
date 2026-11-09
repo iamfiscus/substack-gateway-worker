@@ -25,7 +25,9 @@ For each case, on each side: the HTTP status, the `content-type` (lowercased),
 the body as parsed JSON (an MCP SSE stream is reduced to its JSON-RPC message,
 and tool-result text is parsed as JSON when it is JSON), and the list of calls
 the gateway made to the fake Substack (method, path, sorted query, JSON body).
-Object key order is ignored; array order is not. Other headers, including
+Object key order is ignored; array order is not, except that the `tools/list`
+result is sorted by tool name on both sides (upstream's tool order follows
+`importlib.metadata.entry_points()`, i.e. the host filesystem's directory order). Other headers, including
 `X-Request-ID`, are not compared.
 
 The result is `{ total, mismatches, allowed, happyFailures }`.

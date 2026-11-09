@@ -101,6 +101,19 @@ function normalizeMcp(body: unknown): unknown {
   };
 }
 
+/**
+ * tools/list compared by tool name. Upstream registers its plugin packages in
+ * `importlib.metadata.entry_points()` order, which follows the filesystem's
+ * directory listing order (sorted on macOS APFS, hash order on Linux, as in
+ * the Sandbox container), so its tool order is not stable across hosts.
+ */
+function sortToolsList(body: unknown): unknown {
+  const result = (body as { result?: { tools?: { name?: string }[] } } | null)?.result;
+  if (!result || !Array.isArray(result.tools)) return body;
+  const tools = [...result.tools].sort((a, b) => String(a.name).localeCompare(String(b.name)));
+  return { ...(body as object), result: { ...result, tools } };
+}
+
 async function observe(base: string, c: MatrixCase, id: number): Promise<Observation> {
   await control('reset');
   await control('mode', { status: c.substackStatus ?? 200 });
@@ -111,6 +124,7 @@ async function observe(base: string, c: MatrixCase, id: number): Promise<Observa
   await control('mode', { status: 200 });
   let body = parseBody(contentType, text);
   if (c.mcp || c.rpc) body = normalizeMcp(body);
+  if (c.rpc?.method === 'tools/list') body = sortToolsList(body);
   return { status: res.status, contentType, body, calls };
 }
 
