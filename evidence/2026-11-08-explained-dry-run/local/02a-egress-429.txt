@@ -1,0 +1,26 @@
+# 429 egress finding: Cloudflare Worker egress vs local (Mac) egress
+# captured: 2026-11-09T01:24:38Z
+# route: GET /api/v1/profiles/jakubslys (public profile read)
+# anonymous probe (no key) to deployed worker:
+$ curl -s -o /dev/null -w '%{http_code}' https://substack-gateway-nerding.me-892.workers.dev/api/v1/profiles/jakubslys
+-> 401 (route requires the gateway key; keyed runs below)
+
+$ for i in 1..10: curl -s -o /dev/null -w '%{http_code}' -H 'Authorization: Bearer <redacted>' $BASE/api/v1/profiles/jakubslys; sleep 1
+
+#    workers.dev (CF egress)      127.0.0.1:8787 (Mac egress) 
+1    429                          200                         
+2    429                          200                         
+3    429                          200                         
+4    429                          200                         
+5    200                          200                         
+6    429                          200                         
+7    429                          200                         
+8    429                          200                         
+9    429                          200                         
+10   429                          200                         
+
+# tally
+workers.dev:    1 200    9 429 
+local:         10 200 
+# sample error body from workers.dev (last request):
+{"detail":"Substack returned 429: HTTP 429"}

@@ -1,0 +1,29 @@
+# Evidence bundle: substack-gateway-worker ("Explained: hands-on")
+
+Directory: `<scratch>/evidence-substack-gateway/local/`
+Gateway repo: `~/dev/substack-gateway-worker` @ `d5d0a1a` (tag v0.1.0). Local gateway: `wrangler dev` at http://127.0.0.1:8787, owner mode, Mac egress.
+Secrets: the gateway key was loaded with `set -a; . <instances/main/.gateway-key>; set +a` and is shown as `Bearer <redacted>` everywhere; every text artifact was passed through `sed "s|$GATEWAY_KEY|<redacted>|g"`. The cookie (.dev.vars) was never read. No Substack writes were made.
+Timestamps are UTC unless noted (screenshot file mtimes are local EST, UTC-5).
+
+| Artifact | What it shows | How it was produced | Timestamp |
+|---|---|---|---|
+| `01a-local-root-json.png` | Local gateway `GET /` JSON (application, module `gateway-oss`, feature list). No secrets. | Playwright MCP: `browser_resize 1440x900` → `browser_navigate http://127.0.0.1:8787/` → `browser_take_screenshot` (viewport, css scale) | 2026-11-09T01:25:48Z |
+| `01b-swagger-ui-api-docs.png` | Swagger UI for "Substack Gateway 0.1.0 OAS 3.1", the health/me/following/notes groups. Authorize dialog never opened. | In owner mode `/api/docs` and `/api/openapi.json` need the key, and putting it into the browser would mean placing the key in a tool call. Instead: `curl -H 'Authorization: Bearer <redacted>' http://127.0.0.1:8787/api/openapi.json` and `/api/docs`, saved unchanged under `../swagger-mirror/api/` (checked: 0 occurrences of the key), served with `python3 -I -m http.server 8799 --bind 127.0.0.1`, then Playwright `browser_navigate http://127.0.0.1:8799/api/docs/` → `browser_take_screenshot`. The page is the gateway's own Swagger HTML and spec, byte for byte; only the host differs (the 8799 URL is not visible in the shot). | 2026-11-09T01:26:07Z |
+| `01c-local-api-docs-401-owner-mode.png` | `http://127.0.0.1:8787/api/docs` without a key → 401. Shows that the docs are key-gated in owner mode. | Playwright `browser_navigate http://127.0.0.1:8787/api/docs` → `browser_take_screenshot` | 2026-11-09T01:25:43Z |
+| `01d-github-repo.png` | Public GitHub repo page (43 commits, 1 tag, d5d0a1a, MIT, TypeScript 87%). Logged out. | Playwright `browser_navigate https://github.com/iamfiscus/substack-gateway-worker` → `browser_take_screenshot` | 2026-11-09T01:26:12Z |
+| `02a-egress-429.txt` | 429 finding. With the key, `/api/v1/profiles/jakubslys` 10 times each: workers.dev **9×429, 1×200**; local **10×200**. An anonymous probe gets 401 (the route needs the gateway key). Sample body: `{"detail":"Substack returned 429: HTTP 429"}`. | `bash ../run-a.sh`: a loop of `curl -s -o /dev/null -w '%{http_code}' -H 'Authorization: Bearer <redacted>' <base>/api/v1/profiles/jakubslys` against both bases, 1 s sleep between pairs | 2026-11-09T01:24:38Z |
+| `02b-local-authenticated-reads.txt` | Local: health/ready 200 `{"connected":true}`; /me 200 (id, handle, name only); /drafts 200, count 3 (no titles or bodies); /stats/subscribers 200 (body not captured). | `bash ../run-b.sh`: `curl -H 'Authorization: Bearer <redacted>'` per route, filtered with `jq '{id,handle,name}'` / `jq length`; stats run with `-o /dev/null` | 2026-11-09T01:25:10Z |
+| `02c-mcp-tools-list.txt` | MCP `tools/list` on local `/mcp`: **49 tools**, plus the first 10 names. | `curl -X POST http://127.0.0.1:8787/mcp -H 'Authorization: Bearer <redacted>' -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'` → `jq '.result.tools'` | 2026-11-09T01:25:11Z |
+| `03-test-results.txt` | Summary: node 4366 pass / 2 skip; workers 8/8; e2e 12 pass, 1 expected fail (post comments 404), 7 skipped. | Summarized from the raw logs below | 2026-11-09T01:27Z |
+| `03-raw-npm-test.log` | Raw `npm test` output (exit 0). | `cd <repo> && npm test` | 2026-11-09T01:25:24Z |
+| `03-raw-test-workers.log` | Raw `npm run test:workers` output (exit 0). | `cd <repo> && npm run test:workers` | 2026-11-09T01:25:28Z |
+| `03-raw-test-e2e.log` | Raw e2e verbose output with each test listed (exit 1, the expected comments failure). | `E2E_BASE_URL=http://127.0.0.1:8787 E2E_GATEWAY_KEY=<redacted> E2E_PROFILE_SLUG=jakubslys E2E_POST_ID=194784961 E2E_NOTE_ID=382389778 E2E_REQUEST_INTERVAL_SEC=1 npx vitest run --project e2e --reporter=verbose` (the same suite as `npm run test:e2e`, which also ran at 01:25:32Z with the identical 1 failed / 12 passed / 7 skipped result) | 2026-11-09T01:26:34Z |
+| `04-repo-facts.txt` | 43 commits; 10,292 TS lines in src/ (78 files, no tests in src/); 11,731 TS lines in test/; CHANGELOG 51 endpoints / 49 tools, both confirmed live (51 OpenAPI operations, 49 tools/list); test counts. | `git log --oneline \| wc -l`; `find src -name '*.ts' ! -name '*.test.ts' \| xargs cat \| wc -l`; `grep -n '51 endpoints\|49 tools' CHANGELOG.md`; `jq` over the served openapi.json | 2026-11-09T01:27:08Z |
+| `timeline.md` | Key events, decisions and failures of the port (Task 0 429 NO-GO, empty-secret upload, missing connect.sid, /me/notes and /me/following drift, tag move). | Hand-summarized from `site/.superpowers/sdd/2026-11-07-substack-gateway-worker/progress.md` and `git log` | 2026-11-09T01:28Z |
+
+Helper scripts (they read the key from the file and never print it): `../run-a.sh`, `../run-b.sh`, `../run-tests.sh`. Swagger mirror: `../swagger-mirror/` (public spec plus the gateway's Swagger HTML; no secrets).
+
+## Caveats
+- `02b` includes the account's public display name, handle and numeric id, as requested. Drop it if the post should not show the id.
+- Screenshots are viewport captures (1440×900), not full-page.
+- The Swagger screenshot comes from a local static mirror of the gateway's own page, because the live `/api/docs` is key-gated in owner mode. Either reproduce it on a keyless instance or say so in the post.

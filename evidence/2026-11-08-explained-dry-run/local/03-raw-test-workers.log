@@ -1,0 +1,16 @@
+started 2026-11-09T01:25:28Z
+
+> substack-gateway-worker@0.1.0 test:workers
+> vitest run --project workers
+
+
+ RUN  v4.1.12 ~/dev/substack-gateway-worker
+
+Sourcemap for "~/dev/substack-gateway-worker/node_modules/node-html-markdown/dist/index.js" points to missing source files
+
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+   Start at  20:25:30
+   Duration  2.59s (transform 512ms, setup 0ms, import 1.21s, tests 1.02s, environment 0ms)
+
+exit 0 at 2026-11-09T01:25:32Z

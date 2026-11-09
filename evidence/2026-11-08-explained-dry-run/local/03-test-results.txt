@@ -1,0 +1,39 @@
+# Test results: substack-gateway-worker @ d5d0a1a (v0.1.0)
+# Full logs: 03-raw-npm-test.log, 03-raw-test-workers.log, 03-raw-test-e2e.log (ANSI stripped, key redacted)
+
+## npm test  (vitest --project node)   run 2026-11-09T01:25:24Z, exit 0
+ Test Files  71 passed (71)
+      Tests  4366 passed | 2 skipped (4368)
+   Duration  2.21s
+
+## npm run test:workers  (vitest --project workers, workerd pool)   run 2026-11-09T01:25:28Z, exit 0
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+   Duration  2.59s
+
+## npm run test:e2e  (read-only, against LOCAL gateway http://127.0.0.1:8787, Mac egress)
+## first run 2026-11-09T01:25:32Z (default reporter); recorded run 2026-11-09T01:26:34Z with --reporter=verbose, exit 1
+$ E2E_BASE_URL=http://127.0.0.1:8787 E2E_GATEWAY_KEY=<redacted> E2E_PROFILE_SLUG=jakubslys \
+  E2E_POST_ID=194784961 E2E_NOTE_ID=382389778 E2E_REQUEST_INTERVAL_SEC=1 npm run test:e2e
+  (recorded run: same env, `npx vitest run --project e2e --reporter=verbose`)
+
+ ✓ root metadata returns application info
+ ✓ liveness probe returns 200
+ ✓ readiness probe with valid credentials returns 200
+ ✓ gets own profile
+ ✓ lists own posts
+ ↓ lists own notes (known upstream drift)        -- Substack returns 404 on /me/notes
+ ↓ lists own following (known upstream drift)    -- Substack returns 403 on /me/following
+ ✓ profiles > gets profile by slug
+ ✓ profiles > gets profile posts
+ ✓ profiles > gets profile notes
+ ✓ posts > gets post by ID
+ × posts > gets post comments                    -- EXPECTED: "Expected 200, got 404: Substack returned 404: Post not found"
+                                                    (comments are fetched on the owner's publication host; post 194784961 is not on nerding)
+ ✓ notes > gets note by ID
+ ✓ MCP public tools > initializes and lists public tools
+ ✓ MCP public tools > calls public MCP tools over HTTP
+ ↓ writes.test.ts x5 (throwaway publication only; writes are opt-in and refused for the main instance)
+
+      Tests  1 failed | 12 passed | 7 skipped (22)
+=> matches expectation: 12 pass, 1 expected fail (post comments), 7 skipped (2 upstream drift + 5 write scenarios).

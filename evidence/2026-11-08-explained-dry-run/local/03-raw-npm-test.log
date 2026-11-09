@@ -1,0 +1,15 @@
+started 2026-11-09T01:25:24Z
+
+> substack-gateway-worker@0.1.0 test
+> vitest run --project node
+
+
+ RUN  v4.1.12 ~/dev/substack-gateway-worker
+
+
+ Test Files  71 passed (71)
+      Tests  4366 passed | 2 skipped (4368)
+   Start at  20:25:26
+   Duration  2.21s (transform 3.99s, setup 0ms, import 13.97s, tests 6.20s, environment 3ms)
+
+exit 0 at 2026-11-09T01:25:28Z

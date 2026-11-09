@@ -1,0 +1,15 @@
+# MCP tools/list against LOCAL /mcp (streamable HTTP)
+# captured: 2026-11-09T01:25:11Z
+$ curl -s -X POST http://127.0.0.1:8787/mcp -H 'Authorization: Bearer <redacted>' -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+tool count: 49
+first 10 names:
+  get_my_following
+  list_drafts
+  get_draft
+  create_draft
+  upload_image
+  update_draft
+  delete_draft
+  get_ai_detection
+  check_draft
+  schedule_draft

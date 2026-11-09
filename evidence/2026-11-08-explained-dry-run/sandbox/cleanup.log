@@ -1,0 +1,29 @@
+== 2026-11-09T02:27:03Z containers images list (before)
+REPOSITORY                               TAG
+substack-gateway-harness-harnesssandbox  222a28c9
+substack-gateway-harness-harnesssandbox  32245923
+substack-gateway-harness-harnesssandbox  861efe80
+substack-gateway-harness-harnesssandbox  93878891
+== containers delete app
+────────────────────
+╭ Delete your container 
+│
+╰ Your container has been deleted 
+
+== worker delete
+
+ ⛅️ wrangler 4.158.0
+────────────────────
+Successfully deleted substack-gateway-harness
+== registry image delete
+Deleted substack-gateway-harness-harnesssandbox:222a28c9 (sha256:46608a6b0718ad9d03a6128574cd8b26d57498f32f6223d62eab27e569b66357)
+Deleted substack-gateway-harness-harnesssandbox:32245923 (sha256:00d4ab0f4aee2522a925d5dd9cc59329b6e15fe694b420e8707a7a3f3d398327)
+Deleted substack-gateway-harness-harnesssandbox:861efe80 (sha256:435c6bc5c909f82c641f244f0d41c61b0916ae680729805885daf6d8ab1099a5)
+Deleted substack-gateway-harness-harnesssandbox:93878891 (sha256:40320c11d450a70d23a8e19ac6d7e944c523bf95b4f6c3a559df68be1f9960a3)
+== verify 2026-11-09T02:27:31Z
+container apps named harness: 0
+registry images named harness: 0
+workers.dev /run HTTP: 404
+
+🪵  Logs were written to "~/.wrangler/logs/wrangler-2026-11-09_02-27-35_347.log"
+secret file removed

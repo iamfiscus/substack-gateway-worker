@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- Parity harness ran on Cloudflare Sandbox: 519 cases, 0 mismatches (66 allowed
+  differences). Receipt with every attempt, failures included:
+  `evidence/2026-11-08-explained-dry-run/`.
+- Harness fixes for Sandbox: start upstream with `uv run --frozen --no-sync` (the container
+  has no internet), restart the container on retry and return 503 JSON instead of error
+  1101, and compare `tools/list` by tool name (upstream's order follows filesystem
+  entry-point order and differs between hosts).
+
 ## 0.1.0 - 2026-11-08
 
 First release: an unofficial Cloudflare Worker port of

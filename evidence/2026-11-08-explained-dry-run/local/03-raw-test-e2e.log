@@ -1,0 +1,50 @@
+started 2026-11-09T01:26:34Z
+
+ RUN  v4.1.12 ~/dev/substack-gateway-worker
+
+ ✓ |e2e| test/e2e/basics.test.ts > e2e: read endpoints > root metadata returns application info 19ms
+ ✓ |e2e| test/e2e/basics.test.ts > e2e: read endpoints > liveness probe returns 200 987ms
+ ✓ |e2e| test/e2e/basics.test.ts > e2e: read endpoints > readiness probe with valid credentials returns 200 1119ms
+ ✓ |e2e| test/e2e/basics.test.ts > e2e: read endpoints > gets own profile 1144ms
+ ✓ |e2e| test/e2e/basics.test.ts > e2e: read endpoints > lists own posts 1110ms
+ ↓ |e2e| test/e2e/basics.test.ts > e2e: read endpoints > lists own notes (known upstream drift)
+ ↓ |e2e| test/e2e/basics.test.ts > e2e: read endpoints > lists own following (known upstream drift)
+ ✓ |e2e| test/e2e/basics.test.ts > e2e: read endpoints > profiles (E2E_PROFILE_SLUG) > gets profile by slug 813ms
+ ✓ |e2e| test/e2e/basics.test.ts > e2e: read endpoints > profiles (E2E_PROFILE_SLUG) > gets profile posts 1259ms
+ ✓ |e2e| test/e2e/basics.test.ts > e2e: read endpoints > profiles (E2E_PROFILE_SLUG) > gets profile notes 986ms
+ ✓ |e2e| test/e2e/basics.test.ts > e2e: read endpoints > posts (E2E_POST_ID) > gets post by ID 731ms
+ × |e2e| test/e2e/basics.test.ts > e2e: read endpoints > posts (E2E_POST_ID) > gets post comments 926ms
+   → Expected 200, got 404: {"detail":"Substack returned 404: Post not found"}
+ ✓ |e2e| test/e2e/basics.test.ts > e2e: read endpoints > notes (E2E_NOTE_ID) > gets note by ID 1049ms
+ ✓ |e2e| test/e2e/basics.test.ts > e2e: read endpoints > MCP public tools > initializes and lists public tools 2880ms
+ ✓ |e2e| test/e2e/basics.test.ts > e2e: read endpoints > MCP public tools > calls public MCP tools over HTTP 6114ms
+ ↓ |e2e| test/e2e/writes.test.ts > e2e: write scenarios (throwaway publication only) > creates, fetches and deletes a note (needs api:notes:create + api:notes:delete)
+ ↓ |e2e| test/e2e/writes.test.ts > e2e: write scenarios (throwaway publication only) > lists drafts
+ ↓ |e2e| test/e2e/writes.test.ts > e2e: write scenarios (throwaway publication only) > draft lifecycle: create, fetch, update
+ ↓ |e2e| test/e2e/writes.test.ts > e2e: write scenarios (throwaway publication only) > draft pre-publish and AI-detection reads
+ ↓ |e2e| test/e2e/writes.test.ts > e2e: write scenarios (throwaway publication only) > rich draft survives a round-trip
+ · |e2e| test/e2e/writes.test.ts > e2e: write scenarios (throwaway publication only) > post comments (E2E_ENABLE_COMMENTS=1, E2E_POST_ID) > lifecycle: create, reply, list, react, delete
+ · |e2e| test/e2e/writes.test.ts > e2e: write scenarios (throwaway publication only) > post comments (E2E_ENABLE_COMMENTS=1, E2E_POST_ID) > reply to a non-existent comment returns 404
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |e2e| test/e2e/basics.test.ts > e2e: read endpoints > posts (E2E_POST_ID) > gets post comments
+Error: Expected 200, got 404: {"detail":"Substack returned 404: Post not found"}
+ ❯ expectStatus test/e2e/support.ts:91:34
+     89|
+     90| export function expectStatus(r: Reply, status: number): void {
+     91|   if (r.status !== status) throw new Error(`Expected ${status}, got ${…
+       |                                  ^
+     92| }
+     93|
+ ❯ test/e2e/basics.test.ts:82:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 skipped (2)
+      Tests  1 failed | 12 passed | 7 skipped (22)
+   Start at  20:26:36
+   Duration  19.30s (transform 22ms, setup 0ms, import 35ms, tests 19.14s, environment 0ms)
+
+exit 1 at 2026-11-09T01:26:55Z

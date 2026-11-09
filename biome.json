@@ -9,6 +9,7 @@
       "!test/fixtures",
       "!test/features",
       "!docs/drafts-markdown.md",
+      "!evidence",
       "!scripts/golden/corpus",
       "!scripts/golden/corpus-docs",
       "!package-lock.json"

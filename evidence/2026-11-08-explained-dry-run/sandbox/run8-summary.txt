@@ -1,0 +1,4 @@
+total 519 mismatches 0 allowed 66 happyFailures 0
+61 Inner array of a 422 `detail`: FastAPI/pydantic and zod word, type and count validation er
+4 MCP tool-argument validation text: pydantic `validate_call` vs zod wording, the MCP twin o
+1 Version strings (brief: allowed). Upstream FastMCP reports its own library version (4.1.6)

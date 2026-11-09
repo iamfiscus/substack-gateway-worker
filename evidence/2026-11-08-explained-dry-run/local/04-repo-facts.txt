@@ -1,0 +1,30 @@
+# Repo facts: substack-gateway-worker
+# captured: 2026-11-09T01:27:08Z  HEAD=d5d0a1a  tag v0.1.0=d5d0a1a
+
+$ git log --oneline | wc -l
+43
+
+$ git log --reverse --format='%ad' --date=iso | head -1; git log -1 --format='%ad' --date=iso
+first commit: 2026-11-07 15:29:33 -0500
+last commit:  2026-11-08 20:22:45 -0500
+
+$ find src -name '*.ts' ! -name '*.test.ts' ! -path '*/__tests__/*' | xargs cat | wc -l
+TypeScript lines in src/ (excluding tests): 10292 across 78 files
+(test files inside src/: 0)
+
+$ find test -name '*.ts' | xargs cat | wc -l
+TypeScript lines in test/: 11731 across 94 files
+
+$ grep -n '51 endpoints\|49 tools' CHANGELOG.md
+9:- REST API with parity to upstream: 51 endpoints, OpenAPI document and Swagger UI.
+10:- MCP server over streamable HTTP at `/mcp`: 49 tools, matching upstream names and schemas.
+
+# cross-checks (live):
+OpenAPI operations served by /api/openapi.json: 51
+MCP tools from tools/list: 49
+
+# test counts (from 03-raw-*.log)
+npm test (node project):       Tests  4366 passed | 2 skipped (4368)
+npm run test:workers (workerd): Tests  8 passed (8)
+npm run test:e2e (live local): Tests  1 failed | 12 passed | 7 skipped (22)
+parity harness (progress.md, T20/final): 519 cases, 0 mismatches

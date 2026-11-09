@@ -1,0 +1,17 @@
+# Authenticated read-only checks against LOCAL gateway (wrangler dev, owner mode, Mac egress)
+# captured: 2026-11-09T01:25:10Z
+
+$ curl -s -H 'Authorization: Bearer <redacted>' http://127.0.0.1:8787/api/v1/health/ready
+HTTP 200
+{"connected":true}
+
+$ curl -s -H 'Authorization: Bearer <redacted>' http://127.0.0.1:8787/api/v1/me | jq '{id, handle, name}'
+HTTP 200
+{"id":107010774,"handle":"jdfiscus","name":"Jd Fiscus"}
+
+$ curl -s -H 'Authorization: Bearer <redacted>' http://127.0.0.1:8787/api/v1/drafts | jq '<count only>'
+HTTP 200
+draft count: 3
+
+$ curl -s -o /dev/null -w '%{http_code}' -H 'Authorization: Bearer <redacted>' http://127.0.0.1:8787/api/v1/stats/subscribers
+HTTP 200   (body intentionally not captured)
