@@ -42,11 +42,11 @@ Worker you run yourself.
 Turned on by Worker secrets. Callers authenticate with a gateway key; the Worker
 supplies the owner's Substack cookies.
 
-| Name                                                               | Kind    | Purpose                                                                                                        |
-| ------------------------------------------------------------------ | ------- | -------------------------------------------------------------------------------------------------------------- |
-| `GATEWAY_API_KEYS`                                                 | secret  | Comma list of `label:key` or `label:sha256:<hex>`. The label appears in logs.                                  |
+| Name                                                               | Kind    | Purpose                                                                                                                                              |
+| ------------------------------------------------------------------ | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GATEWAY_API_KEYS`                                                 | secret  | Comma list of `label:key` or `label:sha256:<hex>`. The label appears in logs.                                                                        |
 | `OWNER_PUBLICATION_URL`, `OWNER_SUBSTACK_SID`, `OWNER_CONNECT_SID` | secrets | The owner's credentials, returned by the built-in resolver. `OWNER_CONNECT_SID` is optional; without it the cookie header is `substack.sid=…` alone. |
-| `OWNER_ALLOWED_FEATURES`                                           | var     | Optional comma list of feature names usable with **resolved** credentials. Unset means the default list below. |
+| `OWNER_ALLOWED_FEATURES`                                           | var     | Optional comma list of feature names usable with **resolved** credentials. Unset means the default list below.                                       |
 
 Rules:
 

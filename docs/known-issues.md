@@ -7,10 +7,10 @@ from Substack, not from the port: the same requests fail directly with `curl`, w
 without a `connect.sid` cookie. The port stays faithful to upstream until upstream
 changes.
 
-| Gateway route | MCP tool | Substack call | Substack answers |
-|---|---|---|---|
-| `GET /api/v1/me/notes` | `get_my_notes` | `GET {publication}/api/v1/notes` | `404` |
-| `GET /api/v1/me/following` | `get_my_following` | `GET {publication}/api/v1/user/{id}/subscriber-lists?lists=following` | `403` |
+| Gateway route              | MCP tool           | Substack call                                                         | Substack answers |
+| -------------------------- | ------------------ | --------------------------------------------------------------------- | ---------------- |
+| `GET /api/v1/me/notes`     | `get_my_notes`     | `GET {publication}/api/v1/notes`                                      | `404`            |
+| `GET /api/v1/me/following` | `get_my_following` | `GET {publication}/api/v1/user/{id}/subscriber-lists?lists=following` | `403`            |
 
 `GET /api/v1/health/ready` reports `connected: true` when Substack answers `401`/`403`
 (reachable, upstream semantics), so it is not a cookie-validity check. Use
