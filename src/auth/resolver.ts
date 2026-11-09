@@ -1,6 +1,6 @@
 // Owner-mode credential resolver: credentials come from Worker secrets.
 
-import { type BearerCredentials, validateBearerCredentials } from './credentials';
+import { type BearerCredentials, validateResolvedCredentials } from './credentials';
 import type { AuthInfo } from './gatewayKey';
 
 export interface CredentialResolver {
@@ -19,15 +19,16 @@ export class SecretCredentialResolver implements CredentialResolver {
   constructor(env: OwnerEnv) {
     this.partial = {
       publication_url: env.OWNER_PUBLICATION_URL,
-      substack_sid: env.OWNER_SUBSTACK_SID,
-      connect_sid: env.OWNER_CONNECT_SID,
+      substack_sid: env.OWNER_SUBSTACK_SID?.trim(),
+      // Optional: absent or blank means "send substack.sid alone".
+      connect_sid: env.OWNER_CONNECT_SID?.trim() ?? '',
     };
   }
 
   async resolve(auth: AuthInfo | null): Promise<BearerCredentials | null> {
     if (auth === null) return null;
     const c = { ...this.partial };
-    validateBearerCredentials(c, 'Resolved credentials');
+    validateResolvedCredentials(c);
     return c;
   }
 }

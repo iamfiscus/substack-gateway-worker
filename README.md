@@ -26,8 +26,9 @@ base64-encoded JSON `{publication_url, substack_sid, connect_sid}`. With
 `GATEWAY_API_KEYS` unset the Worker is open, exactly like upstream.
 
 **Owner mode.** Set `GATEWAY_API_KEYS` (comma list of `label:key` or
-`label:sha256:<hex>`) plus `OWNER_PUBLICATION_URL`, `OWNER_SUBSTACK_SID` and
-`OWNER_CONNECT_SID` as Worker secrets. Callers send `Authorization: Bearer <key>`
+`label:sha256:<hex>`) plus `OWNER_PUBLICATION_URL` and `OWNER_SUBSTACK_SID`
+(and `OWNER_CONNECT_SID` if your browser has that cookie; Substack no longer
+always sets it) as Worker secrets. Callers send `Authorization: Bearer <key>`
 and use your cookies without ever seeing them. Everything except
 `/api/v1/health/live` and `/` needs the key. An explicit token still wins and is
 not feature-gated. Resolved credentials are never logged or echoed (`show=true`
@@ -102,9 +103,13 @@ Cookies expire or get rotated, and static secrets go stale. When requests start
 returning `401`, log into Substack, copy fresh values and run:
 
 ```sh
-npx wrangler secret put OWNER_SUBSTACK_SID
-npx wrangler secret put OWNER_CONNECT_SID
+pbpaste | npx wrangler secret put OWNER_SUBSTACK_SID
+pbpaste | npx wrangler secret put OWNER_CONNECT_SID   # only if you have one
 ```
+
+Piping the value avoids a non-interactive shell silently uploading an empty
+secret; a blank `OWNER_SUBSTACK_SID` makes owner routes answer `500 gateway
+misconfigured`.
 
 A `403` from Substack can be a bot-challenge page rather than an expired
 session; try the same cookies in a browser first. Rotate `GATEWAY_API_KEYS` the

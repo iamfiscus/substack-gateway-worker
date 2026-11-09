@@ -29,7 +29,7 @@ bindings.
 npx wrangler secret put GATEWAY_API_KEYS          # label:key or label:sha256:<hex>
 npx wrangler secret put OWNER_PUBLICATION_URL     # https://yourpub.substack.com
 npx wrangler secret put OWNER_SUBSTACK_SID
-npx wrangler secret put OWNER_CONNECT_SID
+npx wrangler secret put OWNER_CONNECT_SID         # optional: only if the cookie exists
 ```
 
 Make a hashed key entry with `printf '%s' "$KEY" | shasum -a 256` and store

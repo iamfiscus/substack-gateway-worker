@@ -6,7 +6,7 @@ import type { Context } from 'hono';
 import {
   type BearerCredentials,
   decodeBearerCredentials,
-  validateBearerCredentials,
+  validateResolvedCredentials,
 } from '../auth/credentials';
 import { type CredentialSource, checkFeature } from '../auth/features';
 import { type AppEnv, type GatewayContext, scopeToSource } from '../context';
@@ -46,7 +46,7 @@ export async function resolveRestCredentials(
     let creds: BearerCredentials | null;
     try {
       creds = await gw.resolver.resolve(gw.authInfo);
-      if (creds) validateBearerCredentials(creds, 'Resolved credentials');
+      if (creds) validateResolvedCredentials(creds);
     } catch {
       gw.log.error('credential resolver failed', { request_id: gw.requestId });
       throw new HttpError(500, GATEWAY_MISCONFIGURED);

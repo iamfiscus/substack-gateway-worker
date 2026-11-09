@@ -25,6 +25,12 @@ describe('SubstackHTTPBase', () => {
     expect(req.headers.get('x-request-id')).toBe('rid-1');
   });
 
+  it('omits connect.sid from the cookie when it is empty', async () => {
+    const f = createFakeSubstack({ 'GET substack.com/api/v1/x': { ok: 1 } });
+    await mk(f, { connectSid: '' }).get('x');
+    expect((f.calls[0] as Request).headers.get('cookie')).toBe('substack.sid=S1');
+  });
+
   it('omits undefined query values', async () => {
     const f = createFakeSubstack({ 'GET substack.com/api/v1/x': {} });
     await mk(f).get('/x', { query: { a: 1, b: undefined, c: 'z' } });

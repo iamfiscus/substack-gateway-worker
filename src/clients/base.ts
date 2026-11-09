@@ -30,7 +30,12 @@ export class SubstackHTTPBase {
 
   constructor(o: SubstackHTTPBaseOptions) {
     this.base = o.base.replace(/\/+$/, '');
-    this.cookie = `substack.sid=${o.substackSid}; connect.sid=${o.connectSid}`;
+    // Owner mode may run on substack.sid alone: connect.sid is then omitted.
+    // Anonymous calls (both empty) keep upstream's exact empty-cookie header.
+    this.cookie =
+      o.connectSid || !o.substackSid
+        ? `substack.sid=${o.substackSid}; connect.sid=${o.connectSid}`
+        : `substack.sid=${o.substackSid}`;
     this.fetcher = o.fetcher;
     this.timeoutMs = o.timeoutMs;
     this.requestId = o.requestId;

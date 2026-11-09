@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Owner mode no longer requires `OWNER_CONNECT_SID`: Substack does not always set a
+  `connect.sid` cookie any more. Without it, owner requests send `substack.sid` alone.
+  Pass-through `x-gateway-token` credentials still require both, as upstream.
+- Owner secrets are trimmed, and a blank `OWNER_SUBSTACK_SID` is rejected as a
+  misconfiguration instead of being sent to Substack.
+
 ## 0.1.0 - 2026-11-07
 
 First release: an unofficial Cloudflare Worker port of

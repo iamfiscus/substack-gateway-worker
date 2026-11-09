@@ -54,6 +54,26 @@ export function validateBearerCredentials(
   }
 }
 
+/**
+ * Owner-mode (resolved) credentials. Unlike a pass-through token (upstream
+ * rule: both cookies), connect.sid may be empty: Substack no longer always
+ * sets it, and the cookie header then carries substack.sid alone. A blank
+ * substack.sid (e.g. an empty secret upload) is still rejected.
+ */
+export function validateResolvedCredentials(
+  c: Partial<BearerCredentials>,
+): asserts c is BearerCredentials {
+  const source = 'Resolved credentials';
+  if (!c.publication_url) throw new Error(`${source} must contain publication_url`);
+  if (!hasHttpScheme(c.publication_url)) {
+    throw new Error(`${source} must contain a valid HTTP or HTTPS publication_url`);
+  }
+  if (!c.substack_sid || c.substack_sid.trim() === '') {
+    throw new Error(`${source} must contain substack_sid`);
+  }
+  if (typeof c.connect_sid !== 'string') throw new Error(`${source} connect_sid must be a string`);
+}
+
 /** Python non-validating b64decode: drop every char outside the alphabet. */
 export function lenientBase64ToBytes(raw: string, urlSafe = false): Uint8Array {
   let s = raw.replace(urlSafe ? /[^A-Za-z0-9\-_+/]/g : /[^A-Za-z0-9+/]/g, '');

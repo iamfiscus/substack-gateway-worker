@@ -251,6 +251,18 @@ describe('MCP endpoint', () => {
     );
   });
 
+  it('runs owner mode with substack.sid only (no OWNER_CONNECT_SID)', async () => {
+    const { request, cookies } = setup({ ...OWNER_ENV, OWNER_CONNECT_SID: undefined });
+    const rest = await request('/api/v1/comments/1', { headers: KEY });
+    expect(rest.status).toBe(200);
+    const { payload } = await mcpCall(request, '/mcp/', 'tools/call', {
+      name: 'get_note',
+      arguments: { note_id: 1 },
+    });
+    expect((payload.result as ToolCallResult).isError).toBeFalsy();
+    expect(cookies()).toEqual(['substack.sid=owner-sid']);
+  });
+
   it('gates an owner-mode write tool', async () => {
     const { request } = setup();
     const { payload } = await mcpCall(request, '/mcp', 'tools/call', {

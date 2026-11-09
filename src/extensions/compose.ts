@@ -39,11 +39,11 @@ export function composeExtensions(exts: readonly GatewayExtension[]): ComposedPr
   return out;
 }
 
-/** Owner mode: a gateway key gate plus complete OWNER_* credentials. */
+/** Owner mode: a gateway key gate plus OWNER_PUBLICATION_URL and OWNER_SUBSTACK_SID (OWNER_CONNECT_SID optional). */
 export function isOwnerMode(env: GatewayEnv): boolean {
   return (
     (env.GATEWAY_API_KEYS ?? '').trim() !== '' &&
-    Boolean(env.OWNER_PUBLICATION_URL && env.OWNER_SUBSTACK_SID && env.OWNER_CONNECT_SID)
+    Boolean(env.OWNER_PUBLICATION_URL && env.OWNER_SUBSTACK_SID?.trim())
   );
 }
 

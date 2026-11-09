@@ -4,7 +4,7 @@ import {
   type BearerCredentials,
   decodeBearerCredentials,
   MissingCredentialsError,
-  validateBearerCredentials,
+  validateResolvedCredentials,
 } from '../auth/credentials';
 import type { AuthInfo } from '../auth/gatewayKey';
 import type { GatewayContext } from '../context';
@@ -28,7 +28,7 @@ export async function resolveMcpCredentials(
   let creds: BearerCredentials | null;
   try {
     creds = await ctx.resolver.resolve(authInfo);
-    if (creds !== null) validateBearerCredentials(creds, 'Resolved credentials');
+    if (creds !== null) validateResolvedCredentials(creds);
   } catch {
     // Same generic text REST uses: resolver errors may carry secrets or env detail.
     throw new Error(GATEWAY_MISCONFIGURED);
